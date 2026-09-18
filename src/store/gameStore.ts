@@ -1,0 +1,367 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { GameStateData, Screen } from '../types';
+import { createInitialBusinesses } from '../data/businesses';
+import { INITIAL_STOCKS } from '../data/stocks';
+import { INITIAL_REAL_ESTATE } from '../data/realEstate';
+import { INITIAL_CRYPTO } from '../data/crypto';
+import { INITIAL_VEHICLES, INITIAL_COLLECTIBLES } from '../data/items';
+import { LIFE_EVENTS, pickRandomEvent } from '../data/events';
+import { netWorth, totalHourlyIncome } from '../utils/netWorth';
+
+const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v));
+
+function freshState(generation: number, legacyBonus: number): GameStateData {
+  return {
+    name: 'Alex Rossa',
+    age: 5,
+    alive: true,
+    yearsPlayed: 0,
+    generation,
+
+    health: 100,
+    happiness: 80,
+    smarts: 20,
+    reputation: 10,
+    married: false,
+    spouseName: null,
+    children: 0,
+    education: 'nenhuma',
+
+    cash: 200 + legacyBonus,
+    clickPower: 5,
+    taxOwed: 0,
+    taxSuspended: false,
+
+    businesses: createInitialBusinesses(),
+    stocks: INITIAL_STOCKS.map((s) => ({ ...s })),
+    realEstate: INITIAL_REAL_ESTATE.map((r) => ({ ...r })),
+    crypto: INITIAL_CRYPTO.map((c) => ({ ...c })),
+    vehicles: INITIAL_VEHICLES.map((v) => ({ ...v })),
+    collectibles: INITIAL_COLLECTIBLES.map((c) => ({ ...c })),
+    residenceLevel: 1,
+
+    activeEventId: null,
+    eventQueue: [],
+    eventLog: [],
+    lastResult: null,
+    seenOnceEvents: [],
+    screen: 'ganhos',
+    showDeathScreen: false,
+  };
+}
+
+interface GameActions {
+  click: () => void;
+  upgradeClickPower: () => void;
+  setScreen: (s: Screen) => void;
+
+  buyBusiness: (id: string) => void;
+  upgradeBusiness: (id: string) => void;
+
+  buyStock: (id: string, qty: number) => void;
+  sellStock: (id: string, qty: number) => void;
+
+  buyRealEstate: (id: string) => void;
+  sellRealEstate: (id: string) => void;
+
+  buyCrypto: (id: string, amount: number) => void;
+  sellCrypto: (id: string, amount: number) => void;
+
+  buyVehicle: (id: string) => void;
+  buyCollectible: (id: string) => void;
+  upgradeResidence: () => void;
+
+  payAllTaxes: () => void;
+  mergeCompanies: () => void;
+
+  advanceYear: () => void;
+  resolveEventChoice: (choiceId: string) => void;
+  dismissResult: () => void;
+
+  startNewLife: () => void;
+}
+
+export type GameStore = GameStateData & GameActions;
+
+function driftMarkets(state: GameStateData): Pick<GameStateData, 'stocks' | 'crypto'> {
+  const stocks = state.stocks.map((s) => {
+    const change = (Math.random() * 2 - 1) * s.volatility;
+    const price = Math.max(0.5, s.price * (1 + change));
+    return { ...s, price: Number(price.toFixed(2)), change: change * 100 };
+  });
+  const crypto = state.crypto.map((c) => {
+    const change = (Math.random() * 2 - 1) * c.volatility;
+    const price = Math.max(0.01, c.price * (1 + change));
+    return { ...c, price: Number(price.toFixed(2)), change: change * 100 };
+  });
+  return { stocks, crypto };
+}
+
+function queueYearEvents(state: GameStateData): string[] {
+  const nw = netWorth(state);
+  const count = 1 + (Math.random() < 0.4 ? 1 : 0);
+  const queue: string[] = [];
+  const usedIds = new Set<string>();
+  let workingState = state;
+  for (let i = 0; i < count; i++) {
+    const event = pickRandomEvent({ ...workingState, seenOnceEvents: [...workingState.seenOnceEvents, ...queue] }, nw);
+    if (!event || usedIds.has(event.id)) continue;
+    usedIds.add(event.id);
+    queue.push(event.id);
+  }
+  return queue;
+}
+
+export const useGameStore = create<GameStore>()(
+  persist(
+    (set, get) => ({
+      ...freshState(1, 0),
+
+      click: () => {
+        const s = get();
+        if (!s.alive) return;
+        set({ cash: s.cash + s.clickPower });
+      },
+
+      upgradeClickPower: () => {
+        const s = get();
+        const cost = Math.round(s.clickPower * 180);
+        if (s.cash < cost) return;
+        set({ cash: s.cash - cost, clickPower: Math.round(s.clickPower * 1.5 + 1) });
+      },
+
+      setScreen: (screen) => set({ screen }),
+
+      buyBusiness: (id) => {
+        const s = get();
+        const biz = s.businesses.find((b) => b.id === id);
+        if (!biz || biz.owned || s.cash < biz.baseCost) return;
+        set({
+          cash: s.cash - biz.baseCost,
+          businesses: s.businesses.map((b) => (b.id === id ? { ...b, owned: true, level: 1 } : b)),
+        });
+      },
+
+      upgradeBusiness: (id) => {
+        const s = get();
+        const biz = s.businesses.find((b) => b.id === id);
+        if (!biz || !biz.owned || biz.level >= biz.maxLevel) return;
+        const cost = Math.round(biz.baseCost * 0.4 * (biz.level + 1));
+        if (s.cash < cost) return;
+        set({
+          cash: s.cash - cost,
+          businesses: s.businesses.map((b) => (b.id === id ? { ...b, level: b.level + 1 } : b)),
+        });
+      },
+
+      buyStock: (id, qty) => {
+        const s = get();
+        const stock = s.stocks.find((st) => st.id === id);
+        if (!stock || qty <= 0) return;
+        const cost = stock.price * qty;
+        if (s.cash < cost) return;
+        set({
+          cash: s.cash - cost,
+          stocks: s.stocks.map((st) => (st.id === id ? { ...st, shares: st.shares + qty } : st)),
+        });
+      },
+
+      sellStock: (id, qty) => {
+        const s = get();
+        const stock = s.stocks.find((st) => st.id === id);
+        if (!stock || qty <= 0 || stock.shares < qty) return;
+        set({
+          cash: s.cash + stock.price * qty,
+          stocks: s.stocks.map((st) => (st.id === id ? { ...st, shares: st.shares - qty } : st)),
+        });
+      },
+
+      buyRealEstate: (id) => {
+        const s = get();
+        const re = s.realEstate.find((r) => r.id === id);
+        if (!re || re.owned || s.cash < re.value) return;
+        set({
+          cash: s.cash - re.value,
+          realEstate: s.realEstate.map((r) => (r.id === id ? { ...r, owned: true } : r)),
+        });
+      },
+
+      sellRealEstate: (id) => {
+        const s = get();
+        const re = s.realEstate.find((r) => r.id === id);
+        if (!re || !re.owned) return;
+        set({
+          cash: s.cash + re.value * 0.85,
+          realEstate: s.realEstate.map((r) => (r.id === id ? { ...r, owned: false } : r)),
+        });
+      },
+
+      buyCrypto: (id, amount) => {
+        const s = get();
+        const c = s.crypto.find((cr) => cr.id === id);
+        if (!c || amount <= 0) return;
+        const cost = c.price * amount;
+        if (s.cash < cost) return;
+        set({
+          cash: s.cash - cost,
+          crypto: s.crypto.map((cr) => (cr.id === id ? { ...cr, amount: cr.amount + amount } : cr)),
+        });
+      },
+
+      sellCrypto: (id, amount) => {
+        const s = get();
+        const c = s.crypto.find((cr) => cr.id === id);
+        if (!c || amount <= 0 || c.amount < amount) return;
+        set({
+          cash: s.cash + c.price * amount,
+          crypto: s.crypto.map((cr) => (cr.id === id ? { ...cr, amount: cr.amount - amount } : cr)),
+        });
+      },
+
+      buyVehicle: (id) => {
+        const s = get();
+        const v = s.vehicles.find((veh) => veh.id === id);
+        if (!v || v.owned || s.cash < v.price) return;
+        set({
+          cash: s.cash - v.price,
+          vehicles: s.vehicles.map((veh) => (veh.id === id ? { ...veh, owned: true } : veh)),
+        });
+      },
+
+      buyCollectible: (id) => {
+        const s = get();
+        const c = s.collectibles.find((col) => col.id === id);
+        if (!c || c.owned || s.cash < c.price) return;
+        set({
+          cash: s.cash - c.price,
+          collectibles: s.collectibles.map((col) => (col.id === id ? { ...col, owned: true } : col)),
+        });
+      },
+
+      upgradeResidence: () => {
+        const s = get();
+        const cost = 50000 * Math.pow(1.8, s.residenceLevel);
+        if (s.cash < cost) return;
+        set({ cash: s.cash - cost, residenceLevel: s.residenceLevel + 1 });
+      },
+
+      payAllTaxes: () => {
+        const s = get();
+        if (!s.taxSuspended && s.taxOwed <= 0) return;
+        if (s.cash < s.taxOwed) return;
+        set({ cash: s.cash - s.taxOwed, taxOwed: 0, taxSuspended: false });
+      },
+
+      mergeCompanies: () => {
+        const s = get();
+        const owned = s.businesses.filter((b) => b.owned);
+        if (owned.length < 2) return;
+        const cost = Math.round(owned.reduce((sum, b) => sum + b.baseCost * 0.5, 0));
+        if (s.cash < cost) return;
+        set({
+          cash: s.cash - cost,
+          businesses: s.businesses.map((b) => (b.owned && b.level < b.maxLevel ? { ...b, level: b.level + 1 } : b)),
+        });
+      },
+
+      advanceYear: () => {
+        const s = get();
+        if (!s.alive || s.activeEventId) return;
+
+        const income = totalHourlyIncome(s);
+        const yearlyEarnings = income * 600;
+        const { stocks, crypto } = driftMarkets(s);
+
+        const ageNext = s.age + 1;
+        let health = s.health;
+        if (ageNext > 45) health = clamp(health - (ageNext > 65 ? 2.5 : 1));
+        if (ageNext <= 18) health = clamp(health + 1);
+        let happiness = clamp(s.happiness - 1 + (s.married ? 1 : 0));
+
+        const newTaxOwed = s.taxOwed + Math.round(yearlyEarnings * 0.12);
+        const taxSuspended = s.taxSuspended || (yearlyEarnings > 0 && newTaxOwed > yearlyEarnings * 2.5);
+
+        const queue = queueYearEvents({ ...s, age: ageNext, health, happiness });
+
+        set({
+          age: ageNext,
+          yearsPlayed: s.yearsPlayed + 1,
+          cash: s.cash + yearlyEarnings,
+          stocks,
+          crypto,
+          health,
+          happiness,
+          taxOwed: newTaxOwed,
+          taxSuspended,
+          eventQueue: queue,
+          activeEventId: queue[0] ?? null,
+        });
+
+        if (queue.length === 0) {
+          get().dismissResult();
+          checkDeath();
+        }
+
+        function checkDeath() {
+          const st = get();
+          const deathChanceFromAge = st.age > 75 ? (st.age - 75) * 0.02 : 0;
+          const deathChanceFromHealth = st.health <= 0 ? 1 : st.health < 15 ? 0.25 : 0;
+          const chance = Math.min(0.95, deathChanceFromAge + deathChanceFromHealth);
+          if (Math.random() < chance) {
+            set({ alive: false, showDeathScreen: true });
+          }
+        }
+      },
+
+      resolveEventChoice: (choiceId) => {
+        const s = get();
+        if (!s.activeEventId) return;
+        const event = LIFE_EVENTS.find((e) => e.id === s.activeEventId);
+        if (!event) return;
+        const choice = event.choices.find((c) => c.id === choiceId);
+        if (!choice) return;
+
+        const { state: partial, resultText } = choice.apply(s);
+        const merged: GameStateData = { ...s, ...partial };
+
+        const nextQueue = s.eventQueue.slice(1);
+        const seenOnce = event.once ? [...s.seenOnceEvents, event.id] : s.seenOnceEvents;
+
+        set({
+          ...partial,
+          seenOnceEvents: seenOnce,
+          eventQueue: nextQueue,
+          activeEventId: nextQueue[0] ?? null,
+          lastResult: { title: event.title, text: resultText, icon: event.icon },
+          eventLog: [
+            { year: merged.yearsPlayed, age: merged.age, icon: event.icon, title: event.title, resultText },
+            ...s.eventLog,
+          ].slice(0, 40),
+        });
+
+        if (nextQueue.length === 0) {
+          const finalState = get();
+          const deathChanceFromAge = finalState.age > 75 ? (finalState.age - 75) * 0.02 : 0;
+          const deathChanceFromHealth = finalState.health <= 0 ? 1 : finalState.health < 15 ? 0.25 : 0;
+          const chance = Math.min(0.95, deathChanceFromAge + deathChanceFromHealth);
+          if (Math.random() < chance) {
+            set({ alive: false, showDeathScreen: true });
+          }
+        }
+      },
+
+      dismissResult: () => set({ lastResult: null }),
+
+      startNewLife: () => {
+        const s = get();
+        const legacyBonus = Math.round(netWorth(s) * 0.02);
+        set({ ...freshState(s.generation + 1, legacyBonus), showDeathScreen: false });
+      },
+    }),
+    {
+      name: 'rich-idle-tycoon-save',
+      version: 1,
+    }
+  )
+);
