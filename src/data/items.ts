@@ -1,6 +1,7 @@
 import type { Vehicle, Collectible } from '../types';
 import type { CarVariant, BoatVariant, PlaneVariant } from '../components/vehicleArt';
-import type { CoinTier, WatchTier, ArtTier } from '../components/collectibleArt';
+import type { CoinTier, WatchStyle, RarityTier, ArtworkKey } from '../components/collectibleArt';
+import type { ResidenceVariant } from '../components/residenceArt';
 
 interface VehicleDef {
   id: string;
@@ -11,13 +12,19 @@ interface VehicleDef {
 }
 
 const CAR_DEFS: VehicleDef[] = [
-  { id: 'car-compact', name: 'City Car em Segunda Mão', category: 'carro', variant: 'compact', price: 8000 },
-  { id: 'car-sedan', name: 'Sedan Familiar', category: 'carro', variant: 'sedan', price: 28000 },
-  { id: 'car-suv', name: 'SUV Premium', category: 'carro', variant: 'suv', price: 65000 },
-  { id: 'car-sports', name: 'Desportivo Alemão', category: 'carro', variant: 'sports', price: 180000 },
-  { id: 'car-super', name: 'Superdesportivo Italiano', category: 'carro', variant: 'super', price: 650000 },
-  { id: 'car-hyper', name: 'Hipercarro Edição Limitada', category: 'carro', variant: 'hyper', price: 3200000 },
-  { id: 'car-concept', name: 'Concept Car Movido a Energia Limpa', category: 'carro', variant: 'concept', price: 40000000 },
+  { id: 'car-fiatt', name: 'Fiatt 500', category: 'carro', variant: 'compact', price: 6000 },
+  { id: 'car-vw', name: 'Volksvagen Up!', category: 'carro', variant: 'compact', price: 9500 },
+  { id: 'car-toyoya', name: 'Toyoya Corolla', category: 'carro', variant: 'sedan', price: 24000 },
+  { id: 'car-hondah', name: 'Hondah Civic', category: 'carro', variant: 'sedan', price: 30000 },
+  { id: 'car-bmv', name: 'BMV X5', category: 'carro', variant: 'suv', price: 68000 },
+  { id: 'car-rangue', name: 'Rangue Rover Sport', category: 'carro', variant: 'suv', price: 95000 },
+  { id: 'car-porshe', name: 'Porshe 911', category: 'carro', variant: 'sports', price: 180000 },
+  { id: 'car-audii', name: 'Audii R8', category: 'carro', variant: 'sports', price: 220000 },
+  { id: 'car-lambo', name: 'Lamborghinni Huracán', category: 'carro', variant: 'super', price: 650000 },
+  { id: 'car-ferarri', name: 'Ferarri 488', category: 'carro', variant: 'super', price: 720000 },
+  { id: 'car-bugati', name: 'Bugati Chiron', category: 'carro', variant: 'hyper', price: 3200000 },
+  { id: 'car-koenigsegg', name: 'Koenigsegg Jasko', category: 'carro', variant: 'hyper', price: 4800000 },
+  { id: 'car-rimacc', name: 'Rimacc Nevera Protótipo', category: 'carro', variant: 'concept', price: 40000000 },
   { id: 'car-alien', name: 'Veículo Alienígena Recuperado (Área 51)', category: 'carro', variant: 'alien', price: 2500000000 },
 ];
 
@@ -52,57 +59,114 @@ export const INITIAL_VEHICLES: Vehicle[] = [...CAR_DEFS, ...BOAT_DEFS, ...PLANE_
   owned: false,
 }));
 
-interface CollectibleDef {
+interface CoinDef {
   id: string;
   name: string;
-  category: 'moedas' | 'relogios' | 'arte';
-  tier: CoinTier | WatchTier | ArtTier;
+  tier: CoinTier;
   price: number;
 }
 
-const COIN_DEFS: CollectibleDef[] = [
-  { id: 'coin-copper-1', name: 'Moeda de Cobre Comum', category: 'moedas', tier: 'copper', price: 50 },
-  { id: 'coin-copper-2', name: 'Moeda Romana Desgastada', category: 'moedas', tier: 'copper', price: 220 },
-  { id: 'coin-silver-1', name: 'Moeda de Prata Colonial', category: 'moedas', tier: 'silver', price: 1200 },
-  { id: 'coin-silver-2', name: 'Táler de Prata Antigo', category: 'moedas', tier: 'silver', price: 3500 },
-  { id: 'coin-gold-1', name: 'Soberano de Ouro', category: 'moedas', tier: 'gold', price: 18000 },
-  { id: 'coin-gold-2', name: 'Moeda de Ouro do Século XVII', category: 'moedas', tier: 'gold', price: 42000 },
-  { id: 'coin-platinum-1', name: 'Moeda de Platina Rara', category: 'moedas', tier: 'platinum', price: 180000 },
-  { id: 'coin-diamond-1', name: 'Moeda Cravejada de Diamantes', category: 'moedas', tier: 'diamond', price: 2400000 },
-  { id: 'coin-mythic-1', name: 'Moeda Lendária Perdida de Atlântida', category: 'moedas', tier: 'mythic', price: 95000000 },
+const COIN_DEFS: CoinDef[] = [
+  { id: 'coin-copper-1', name: 'Moeda de Cobre Comum', tier: 'copper', price: 10 },
+  { id: 'coin-copper-2', name: 'Dracma Grega Antiga', tier: 'copper', price: 180 },
+  { id: 'coin-silver-1', name: 'Denário Romano de Prata', tier: 'silver', price: 650 },
+  { id: 'coin-silver-2', name: 'Táler de Prata Antigo', tier: 'silver', price: 2200 },
+  { id: 'coin-gold-1', name: 'Florim de Ouro Florentino', tier: 'gold', price: 4200 },
+  { id: 'coin-gold-2', name: 'Soberano Britânico de Ouro', tier: 'gold', price: 12000 },
+  { id: 'coin-platinum-1', name: 'Krugerrande Sul-Africano', tier: 'platinum', price: 28000 },
+  { id: 'coin-diamond-1', name: 'Dólar de Prata "Flowing Hair" (1794)', tier: 'diamond', price: 2000000 },
+  { id: 'coin-diamond-2', name: 'Dobrão Brasher (1787)', tier: 'diamond', price: 9500000 },
+  { id: 'coin-mythic-1', name: 'Águia Dupla de 1933', tier: 'mythic', price: 19000000 },
 ];
 
-const WATCH_DEFS: CollectibleDef[] = [
-  { id: 'watch-basic-1', name: 'Relógio de Pulso Simples', category: 'relogios', tier: 'basic', price: 300 },
-  { id: 'watch-basic-2', name: 'Relógio Vintage de Corda', category: 'relogios', tier: 'basic', price: 900 },
-  { id: 'watch-steel-1', name: 'Cronógrafo em Aço Inoxidável', category: 'relogios', tier: 'steel', price: 6500 },
-  { id: 'watch-gold-1', name: 'Relógio de Ouro Maciço', category: 'relogios', tier: 'gold', price: 48000 },
-  { id: 'watch-diamond-1', name: 'Relógio Cravejado de Diamantes', category: 'relogios', tier: 'diamond', price: 650000 },
-  { id: 'watch-mythic-1', name: 'Peça Única Feita por Encomenda Real', category: 'relogios', tier: 'mythic', price: 18000000 },
+interface WatchDef {
+  id: string;
+  name: string;
+  style: WatchStyle;
+  price: number;
+}
+
+const WATCH_DEFS: WatchDef[] = [
+  { id: 'watch-kasio', name: 'Kasio G-Shockk', style: 'digital', price: 80 },
+  { id: 'watch-swach', name: 'Swach Original', style: 'digital', price: 150 },
+  { id: 'watch-seika', name: 'Seika 5 Sports', style: 'diver', price: 250 },
+  { id: 'watch-citizan', name: 'Citizan Eco-Drive', style: 'diver', price: 450 },
+  { id: 'watch-tisot', name: 'Tisot PRX', style: 'chrono', price: 900 },
+  { id: 'watch-tagheuar', name: 'Tag Heuar Carrera', style: 'chrono', price: 4500 },
+  { id: 'watch-omeqa', name: 'Omeqa Speedmaster', style: 'chrono', price: 9000 },
+  { id: 'watch-kartier', name: 'Kartier Tank', style: 'tank', price: 22000 },
+  { id: 'watch-rolex', name: 'Rolêx Submariner', style: 'classic', price: 38000 },
+  { id: 'watch-patek', name: 'Patek Filipe Nautilus', style: 'skeleton', price: 180000 },
+  { id: 'watch-ap', name: 'Audemars Piguot Royal Oak', style: 'skeleton', price: 220000 },
+  { id: 'watch-rm11', name: 'Richard Millio RM 11', style: 'tonneau', price: 1200000 },
+  { id: 'watch-rm-unique', name: 'Richard Millio Tourbillon Único', style: 'tonneau', price: 28000000 },
 ];
 
-const ART_DEFS: CollectibleDef[] = [
-  { id: 'art-basic-1', name: 'Pintura de Artista de Rua', category: 'arte', tier: 'basic', price: 400 },
-  { id: 'art-fine-1', name: 'Gravura Assinada', category: 'arte', tier: 'fine', price: 5000 },
-  { id: 'art-rare-1', name: 'Escultura Contemporânea', category: 'arte', tier: 'rare', price: 85000 },
-  { id: 'art-exquisite-1', name: 'Tela de Mestre Contemporâneo', category: 'arte', tier: 'exquisite', price: 2200000 },
-  { id: 'art-legendary-1', name: 'Obra-Prima do Renascimento', category: 'arte', tier: 'legendary', price: 120000000 },
-  { id: 'art-mythic-1', name: 'Artefacto Artístico de Origem Desconhecida', category: 'arte', tier: 'mythic', price: 8000000000 },
+interface WineDef {
+  id: string;
+  name: string;
+  tier: RarityTier;
+  price: number;
+}
+
+const WINE_DEFS: WineDef[] = [
+  { id: 'wine-tinto-mesa', name: 'Vinho Tinto de Mesa', tier: 'basic', price: 8 },
+  { id: 'wine-casa', name: 'Vinho da Casa Reserva', tier: 'basic', price: 25 },
+  { id: 'wine-rioja', name: 'Riocha Reserva', tier: 'fine', price: 60 },
+  { id: 'wine-chianti', name: 'Kianti Clássico', tier: 'fine', price: 90 },
+  { id: 'wine-bordeaux', name: 'Bordeaux Supérieur Privado', tier: 'rare', price: 350 },
+  { id: 'wine-barolo', name: 'Barolô do Piemonte', tier: 'rare', price: 600 },
+  { id: 'wine-sassicaia', name: 'Sassicaya Toscana', tier: 'exquisite', price: 2800 },
+  { id: 'wine-domperignon', name: 'Dom Perignan Vintage', tier: 'exquisite', price: 6500 },
+  { id: 'wine-margaux', name: 'Château Margôt Grand Cru', tier: 'legendary', price: 85000 },
+  { id: 'wine-lafite', name: 'Château Lafitt Rothschild 1945', tier: 'legendary', price: 320000 },
+  { id: 'wine-romaneeconti', name: 'Domaine Romané-Konti Grand Cru', tier: 'mythic', price: 2500000 },
+  { id: 'wine-screamingeagle', name: 'Screaming Ealge Cabernet Único', tier: 'mythic', price: 8000000 },
 ];
 
-export const INITIAL_COLLECTIBLES: Collectible[] = [...COIN_DEFS, ...WATCH_DEFS, ...ART_DEFS].map((c) => ({
-  id: c.id,
-  name: c.name,
-  category: c.category,
-  tier: c.tier,
-  price: c.price,
-  owned: false,
-}));
+interface ArtDef {
+  id: string;
+  name: string;
+  artKey: ArtworkKey;
+  price: number;
+}
 
-export const RESIDENCE_TIERS = [
-  { level: 1, name: 'Apartamento', value: 250000 },
-  { level: 5, name: 'Casa de Subúrbio', value: 1200000 },
-  { level: 8, name: 'Villa de Luxo', value: 6500000 },
-  { level: 11, name: 'Mansão', value: 28000000 },
-  { level: 14, name: 'Palácio Privado', value: 195700000 },
+const ART_DEFS: ArtDef[] = [
+  { id: 'art-street', name: 'Pintura de Artista de Rua', artKey: 'street', price: 150 },
+  { id: 'art-watercolor', name: 'Aguarela de Feira de Artesanato', artKey: 'watercolor', price: 400 },
+  { id: 'art-engraving', name: 'Gravura Numerada de Galeria', artKey: 'engraving', price: 3000 },
+  { id: 'art-sculpture', name: 'Escultura de Artista Emergente', artKey: 'sculpture', price: 15000 },
+  { id: 'art-pearlearring', name: 'A Rapariga com Brinco de Pérola', artKey: 'pearlearring', price: 650000 },
+  { id: 'art-scream', name: 'O Grito', artKey: 'scream', price: 1200000 },
+  { id: 'art-starrynight', name: 'A Noite Estrelada', artKey: 'starrynight', price: 45000000 },
+  { id: 'art-lasmeninas', name: 'As Meninas', artKey: 'lasmeninas', price: 60000000 },
+  { id: 'art-guernica', name: 'Guernica', artKey: 'guernica', price: 200000000 },
+  { id: 'art-creationofadam', name: 'A Criação de Adão', artKey: 'creationofadam', price: 150000000 },
+  { id: 'art-monalisa', name: 'Mona Lisa', artKey: 'monalisa', price: 900000000 },
+];
+
+export const INITIAL_COLLECTIBLES: Collectible[] = [
+  ...COIN_DEFS.map((c) => ({ id: c.id, name: c.name, category: 'moedas' as const, tier: c.tier, price: c.price, owned: false })),
+  ...WATCH_DEFS.map((w) => ({ id: w.id, name: w.name, category: 'relogios' as const, tier: w.style, price: w.price, owned: false })),
+  ...WINE_DEFS.map((w) => ({ id: w.id, name: w.name, category: 'vinhos' as const, tier: w.tier, price: w.price, owned: false })),
+  ...ART_DEFS.map((a) => ({ id: a.id, name: a.name, category: 'arte' as const, tier: a.artKey, price: a.price, owned: false })),
+];
+
+export interface ResidenceTier {
+  name: string;
+  price: number;
+  variant: ResidenceVariant;
+}
+
+export const RESIDENCE_TIERS: ResidenceTier[] = [
+  { name: 'Quarto Alugado', price: 2500, variant: 'studio' },
+  { name: 'Apartamento Estúdio', price: 9000, variant: 'studio' },
+  { name: 'Apartamento T1', price: 32000, variant: 'apartment' },
+  { name: 'Apartamento T3 com Varanda', price: 95000, variant: 'apartment' },
+  { name: 'Moradia Geminada', price: 280000, variant: 'house' },
+  { name: 'Moradia Isolada com Jardim', price: 750000, variant: 'house' },
+  { name: 'Villa com Piscina', price: 2600000, variant: 'villa' },
+  { name: 'Mansão de Luxo', price: 28000000, variant: 'mansion' },
+  { name: 'Palácio Privado', price: 250000000, variant: 'palace' },
+  { name: 'Resort Pessoal numa Ilha Privada', price: 2200000000, variant: 'island' },
 ];

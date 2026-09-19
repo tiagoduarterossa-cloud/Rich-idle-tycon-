@@ -5,7 +5,7 @@ import { createInitialBusinesses, BUSINESS_CATALOG, STARTING_BUSINESS_SLOTS, nex
 import { INITIAL_STOCKS } from '../data/stocks';
 import { INITIAL_REAL_ESTATE } from '../data/realEstate';
 import { INITIAL_CRYPTO } from '../data/crypto';
-import { INITIAL_VEHICLES, INITIAL_COLLECTIBLES } from '../data/items';
+import { INITIAL_VEHICLES, INITIAL_COLLECTIBLES, RESIDENCE_TIERS } from '../data/items';
 import { LIFE_EVENTS, pickRandomEvent } from '../data/events';
 import { netWorth, totalHourlyIncome } from '../utils/netWorth';
 
@@ -40,7 +40,7 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
     crypto: INITIAL_CRYPTO.map((c) => ({ ...c })),
     vehicles: INITIAL_VEHICLES.map((v) => ({ ...v })),
     collectibles: INITIAL_COLLECTIBLES.map((c) => ({ ...c })),
-    residenceLevel: 1,
+    residenceLevel: -1,
 
     activeEventId: null,
     eventQueue: [],
@@ -72,7 +72,7 @@ interface GameActions {
 
   buyVehicle: (id: string) => void;
   buyCollectible: (id: string) => void;
-  upgradeResidence: () => void;
+  moveResidence: (tierIndex: number) => void;
 
   payAllTaxes: () => void;
   mergeCompanies: () => void;
@@ -264,11 +264,15 @@ export const useGameStore = create<GameStore>()(
         });
       },
 
-      upgradeResidence: () => {
+      moveResidence: (tierIndex) => {
         const s = get();
-        const cost = 50000 * Math.pow(1.8, s.residenceLevel);
-        if (s.cash < cost) return;
-        set({ cash: s.cash - cost, residenceLevel: s.residenceLevel + 1 });
+        if (s.age < 18) return;
+        const tier = RESIDENCE_TIERS[tierIndex];
+        if (!tier) return;
+        const currentPrice = s.residenceLevel >= 0 ? RESIDENCE_TIERS[s.residenceLevel].price : 0;
+        if (tier.price <= currentPrice) return;
+        if (s.cash < tier.price) return;
+        set({ cash: s.cash - tier.price, residenceLevel: tierIndex });
       },
 
       payAllTaxes: () => {

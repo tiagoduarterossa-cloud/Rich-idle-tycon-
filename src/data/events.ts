@@ -279,6 +279,34 @@ export const LIFE_EVENTS: GameEvent[] = [
 
   // ---------- JOVEM ADULTO ----------
   {
+    id: 'sair-de-casa',
+    icon: '🔑',
+    title: 'Hora de Voar Sozinho',
+    text: () => 'Fazes 18 anos. Legalmente já podes sair de casa dos teus pais e arranjar o teu próprio espaço — quando tiveres dinheiro para isso.',
+    minAge: 18,
+    maxAge: 18,
+    once: true,
+    weight: 12,
+    choices: [
+      {
+        id: 'independencia',
+        label: 'Começar já a poupar para sair de casa',
+        apply: (s) => ({
+          state: { happiness: clamp(s.happiness + 4), smarts: clamp(s.smarts + 2) },
+          resultText: 'Decides que é hora de seres independente. Vais até à secção de Residência assim que tiveres dinheiro.',
+        }),
+      },
+      {
+        id: 'ficar-mais',
+        label: 'Ficar mais um tempo em casa dos pais',
+        apply: (s) => ({
+          state: { happiness: clamp(s.happiness + 6) },
+          resultText: 'Preferes aproveitar mais algum tempo em casa dos teus pais, sem pressa para sair.',
+        }),
+      },
+    ],
+  },
+  {
     id: 'escolha-universidade',
     icon: '🎓',
     title: 'O Caminho Depois da Escola',

@@ -64,7 +64,7 @@ export interface Vehicle {
   owned: boolean;
 }
 
-export type CollectibleCategory = 'moedas' | 'relogios' | 'arte';
+export type CollectibleCategory = 'moedas' | 'relogios' | 'vinhos' | 'arte';
 
 export interface Collectible {
   id: string;

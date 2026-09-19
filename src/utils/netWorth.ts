@@ -38,11 +38,8 @@ export function collectiblesValue(state: GameStateData): number {
 }
 
 export function residenceValue(state: GameStateData): number {
-  let value = RESIDENCE_TIERS[0].value;
-  for (const tier of RESIDENCE_TIERS) {
-    if (state.residenceLevel >= tier.level) value = tier.value;
-  }
-  return value;
+  if (state.residenceLevel < 0) return 0;
+  return RESIDENCE_TIERS[state.residenceLevel]?.price ?? 0;
 }
 
 export function netWorth(state: GameStateData): number {

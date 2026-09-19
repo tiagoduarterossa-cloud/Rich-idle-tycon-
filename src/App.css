@@ -575,6 +575,18 @@
   margin-top: 2px;
 }
 
+.residence-picker-art {
+  width: 56px;
+  height: 46px;
+  background: white;
+  border-radius: 13px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .owned-tag {
   font-size: 12px;
   color: #16a34a;
@@ -739,7 +751,15 @@
 }
 
 .residence-image {
-  font-size: 40px;
+  width: 90px;
+  height: 68px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .residence-title {
