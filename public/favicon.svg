@@ -1,21 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#123a63"/>
-      <stop offset="1" stop-color="#0f766e"/>
+      <stop offset="0" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#0f172a"/>
     </linearGradient>
-    <linearGradient id="coin" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fde68a"/>
-      <stop offset="1" stop-color="#f6b84c"/>
+    <radialGradient id="glow" cx="50%" cy="38%" r="60%">
+      <stop offset="0" stop-color="#3b82f6" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fef3c7"/>
+      <stop offset="0.5" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#b45309"/>
     </linearGradient>
   </defs>
 
   <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <circle cx="32" cy="26" r="26" fill="url(#glow)"/>
 
-  <path d="M15 40 L24 28 L32 34 L44 18" stroke="#5eead4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.85"/>
-  <path d="M36 18 H44 V26" stroke="#5eead4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.85"/>
+  <path
+    d="M16 42 L16 30 L23 37 L32 22 L41 37 L48 30 L48 42 Z"
+    fill="url(#gold)"
+    stroke="#92400e"
+    stroke-width="1.2"
+    stroke-linejoin="round"
+  />
+  <rect x="16" y="42" width="32" height="7" rx="2" fill="url(#band)" stroke="#92400e" stroke-width="1.2"/>
 
-  <circle cx="33" cy="40" r="15" fill="url(#coin)" stroke="#b8860b" stroke-width="1.5"/>
-  <circle cx="33" cy="40" r="11.5" fill="none" stroke="#b8860b" stroke-width="1.2" opacity="0.6"/>
-  <text x="33" y="46" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="16" fill="#7c4a03">$</text>
+  <circle cx="16" cy="30" r="3" fill="#5eead4" stroke="#0f766e" stroke-width="1"/>
+  <circle cx="32" cy="22" r="3.4" fill="#5eead4" stroke="#0f766e" stroke-width="1"/>
+  <circle cx="48" cy="30" r="3" fill="#5eead4" stroke="#0f766e" stroke-width="1"/>
+  <circle cx="32" cy="45.5" r="2.3" fill="#0f766e"/>
 </svg>
