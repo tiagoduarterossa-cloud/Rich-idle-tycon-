@@ -122,8 +122,8 @@ export function EscolaScreen() {
 
       <div className="activity-grid">
         {availableJobs.map((j) => {
-          const done = state.jobsWorkedThisYear.includes(j.id);
-          const disabled = done || state.cash < j.cost;
+          const timesSold = state.jobsWorkedThisYear[j.id] ?? 0;
+          const disabled = state.cash < j.cost;
           return (
             <button
               key={j.id}
@@ -133,16 +133,19 @@ export function EscolaScreen() {
                 const result = workJob(j.id);
                 if (!result) return;
                 const sign = result.net >= 0 ? '+' : '';
-                const mood = result.factor >= 1.15 ? ' 🔥' : result.factor <= 0.75 ? ' 📉' : '';
+                const mood = result.factor >= 1.15 ? ' 🔥' : result.factor <= 0.3 ? ' 📉' : '';
                 flash(`${sign}${formatMoney(result.net, true)}${mood}`);
               }}
             >
               <span className="activity-icon">{j.icon}</span>
               <span className="activity-name">{j.name}</span>
               <span className="activity-effect activity-effect--pay">
-                {done ? 'Feito este ano' : `até +${formatMoney(Math.round(j.pay * 1.5), true)}`}
+                {timesSold >= 3
+                  ? 'Mercado saturado'
+                  : `até +${formatMoney(Math.round(j.pay * 1.5), true)}`}
               </span>
-              {!done && j.cost > 0 && <span className="activity-cost">Custo {formatMoney(j.cost)}</span>}
+              {j.cost > 0 && <span className="activity-cost">Custo {formatMoney(j.cost)}</span>}
+              {timesSold > 0 && <span className="activity-cost">Vendido {timesSold}x este ano</span>}
             </button>
           );
         })}

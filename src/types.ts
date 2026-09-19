@@ -121,7 +121,7 @@ export interface GameStateData {
 
   // objetivos do ano corrente
   actionsThisYear: { hobby: boolean; job: boolean; business: boolean; invest: boolean };
-  jobsWorkedThisYear: string[];
+  jobsWorkedThisYear: Record<string, number>;
 
   // ui / eventos
   activeEventId: string | null;

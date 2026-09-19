@@ -53,7 +53,7 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
     residenceLevel: -1,
 
     actionsThisYear: { hobby: false, job: false, business: false, invest: false },
-    jobsWorkedThisYear: [],
+    jobsWorkedThisYear: {},
 
     activeEventId: null,
     eventQueue: [],
@@ -158,16 +158,18 @@ export const useGameStore = create<GameStore>()(
         if (!s.alive) return null;
         const job = SHORT_TERM_JOBS.find((j) => j.id === jobId);
         if (!job || s.age < job.minAge) return null;
-        if (s.jobsWorkedThisYear.includes(jobId)) return null;
         if (s.cash < job.cost) return null;
-        // a concorrência varia: dias fracos rendem menos, dias bons rendem mais
-        const factor = Number((0.6 + Math.random() * 0.9).toFixed(2));
+        const timesSold = s.jobsWorkedThisYear[jobId] ?? 0;
+        // sem limite fixo: cada vez que voltas a vender o mesmo, inundas o
+        // mercado e a concorrência aperta, até deixar de compensar
+        const base = 0.6 + Math.random() * 0.9;
+        const factor = Number(Math.max(-0.4, base - timesSold * 0.45).toFixed(2));
         const gross = Math.round(job.pay * factor);
         const net = gross - job.cost;
         set({
           cash: s.cash + net,
           actionsThisYear: { ...s.actionsThisYear, job: true },
-          jobsWorkedThisYear: [...s.jobsWorkedThisYear, jobId],
+          jobsWorkedThisYear: { ...s.jobsWorkedThisYear, [jobId]: timesSold + 1 },
         });
         return { net, gross, factor };
       },
@@ -416,7 +418,7 @@ export const useGameStore = create<GameStore>()(
           eventQueue: queue,
           activeEventId: queue[0] ?? null,
           actionsThisYear: { hobby: false, job: false, business: false, invest: false },
-          jobsWorkedThisYear: [],
+          jobsWorkedThisYear: {},
         });
 
         if (queue.length === 0) {
@@ -482,9 +484,9 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'rich-idle-tycoon-save',
-      version: 6,
+      version: 7,
       migrate: (persistedState, persistedVersion) => {
-        if (persistedVersion < 6) {
+        if (persistedVersion < 7) {
           return freshState(1, 0);
         }
         return persistedState as GameStateData;
