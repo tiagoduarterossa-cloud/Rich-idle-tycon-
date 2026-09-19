@@ -23,6 +23,7 @@ export interface Business {
   owned: boolean;
   suspended: boolean;
   isBank: boolean;
+  marketShare: number;
 }
 
 export interface Stock {

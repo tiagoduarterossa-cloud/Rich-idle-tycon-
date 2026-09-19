@@ -1,5 +1,6 @@
-import type { GameStateData } from '../types';
+import type { Business, GameStateData } from '../types';
 import { RESIDENCE_TIERS } from '../data/items';
+import { OPERATING_COST_RATE } from '../data/businesses';
 
 export function businessValue(state: GameStateData): number {
   return state.businesses
@@ -7,10 +8,18 @@ export function businessValue(state: GameStateData): number {
     .reduce((sum, b) => sum + b.baseCost * (1 + b.level * 0.6), 0);
 }
 
+// Rendimento líquido de um negócio: o banco não compete com ninguém (é a
+// poupança do jogador), mas os restantes negócios disputam quota de mercado
+// com a concorrência e têm custos operacionais que comem parte da receita.
+export function businessNetIncome(b: Business): number {
+  const gross = b.baseIncome * (1 + b.level * 0.5);
+  if (b.isBank) return gross;
+  const marketFactor = b.marketShare / 100;
+  return gross * marketFactor * (1 - OPERATING_COST_RATE);
+}
+
 export function hourlyBusinessIncome(state: GameStateData): number {
-  return state.businesses
-    .filter((b) => b.owned && !b.suspended)
-    .reduce((sum, b) => sum + b.baseIncome * (1 + b.level * 0.5), 0);
+  return state.businesses.filter((b) => b.owned && !b.suspended).reduce((sum, b) => sum + businessNetIncome(b), 0);
 }
 
 export function stocksValue(state: GameStateData): number {

@@ -610,6 +610,41 @@
   margin-top: 2px;
 }
 
+.business-market {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.business-market-bar {
+  flex: 1;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  max-width: 90px;
+}
+
+.business-market-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.business-market-label {
+  font-size: 10px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.business-net-income {
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+  margin-top: 2px;
+}
+
 .residence-picker-art {
   width: 56px;
   height: 46px;

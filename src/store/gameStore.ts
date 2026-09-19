@@ -1,7 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { GameStateData, Screen } from '../types';
-import { createInitialBusinesses, BUSINESS_CATALOG, STARTING_BUSINESS_SLOTS, nextSlotCost, creationCost } from '../data/businesses';
+import {
+  createInitialBusinesses,
+  BUSINESS_CATALOG,
+  STARTING_BUSINESS_SLOTS,
+  STARTING_MARKET_SHARE,
+  MARKET_SHARE_UPGRADE_BOOST,
+  nextSlotCost,
+  creationCost,
+} from '../data/businesses';
 import { INITIAL_STOCKS } from '../data/stocks';
 import { INITIAL_REAL_ESTATE } from '../data/realEstate';
 import { INITIAL_CRYPTO } from '../data/crypto';
@@ -58,7 +66,7 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
 }
 
 interface GameActions {
-  workJob: (jobId: string) => void;
+  workJob: (jobId: string) => { net: number; gross: number; factor: number } | null;
   practiceHobby: (hobbyId: string) => void;
   setScreen: (s: Screen) => void;
   setName: (name: string) => void;
@@ -114,6 +122,17 @@ function driftMarkets(state: GameStateData): Pick<GameStateData, 'stocks' | 'cry
   return { stocks, crypto };
 }
 
+function driftBusinessCompetition(state: GameStateData): GameStateData['businesses'] {
+  // a concorrência aperta com o tempo: sem investir (upgrade), a quota de
+  // mercado tende lentamente a perder-se para os rivais
+  return state.businesses.map((b) => {
+    if (b.isBank || !b.owned) return b;
+    const noise = (Math.random() * 2 - 1) * 9;
+    const drift = -1.5 + noise;
+    return { ...b, marketShare: clamp(b.marketShare + drift, 5, 100) };
+  });
+}
+
 function queueYearEvents(state: GameStateData): string[] {
   const nw = netWorth(state);
   const count = 1 + (Math.random() < 0.4 ? 1 : 0);
@@ -136,15 +155,21 @@ export const useGameStore = create<GameStore>()(
 
       workJob: (jobId) => {
         const s = get();
-        if (!s.alive) return;
+        if (!s.alive) return null;
         const job = SHORT_TERM_JOBS.find((j) => j.id === jobId);
-        if (!job || s.age < job.minAge) return;
-        if (s.jobsWorkedThisYear.includes(jobId)) return;
+        if (!job || s.age < job.minAge) return null;
+        if (s.jobsWorkedThisYear.includes(jobId)) return null;
+        if (s.cash < job.cost) return null;
+        // a concorrência varia: dias fracos rendem menos, dias bons rendem mais
+        const factor = Number((0.6 + Math.random() * 0.9).toFixed(2));
+        const gross = Math.round(job.pay * factor);
+        const net = gross - job.cost;
         set({
-          cash: s.cash + job.pay,
+          cash: s.cash + net,
           actionsThisYear: { ...s.actionsThisYear, job: true },
           jobsWorkedThisYear: [...s.jobsWorkedThisYear, jobId],
         });
+        return { net, gross, factor };
       },
 
       practiceHobby: (hobbyId) => {
@@ -191,6 +216,7 @@ export const useGameStore = create<GameStore>()(
           owned: true,
           suspended: false,
           isBank: false,
+          marketShare: clamp(STARTING_MARKET_SHARE + (Math.random() * 20 - 10), 20, 80),
         };
         set({
           cash: s.cash - cost,
@@ -220,7 +246,11 @@ export const useGameStore = create<GameStore>()(
         if (s.cash < cost) return;
         set({
           cash: s.cash - cost,
-          businesses: s.businesses.map((b) => (b.id === id ? { ...b, level: b.level + 1 } : b)),
+          businesses: s.businesses.map((b) =>
+            b.id === id
+              ? { ...b, level: b.level + 1, marketShare: clamp(b.marketShare + MARKET_SHARE_UPGRADE_BOOST, 0, 100) }
+              : b
+          ),
           actionsThisYear: { ...s.actionsThisYear, business: true },
         });
       },
@@ -341,7 +371,11 @@ export const useGameStore = create<GameStore>()(
         if (s.cash < cost) return;
         set({
           cash: s.cash - cost,
-          businesses: s.businesses.map((b) => (b.owned && b.level < b.maxLevel ? { ...b, level: b.level + 1 } : b)),
+          businesses: s.businesses.map((b) =>
+            b.owned && b.level < b.maxLevel
+              ? { ...b, level: b.level + 1, marketShare: clamp(b.marketShare + MARKET_SHARE_UPGRADE_BOOST, 0, 100) }
+              : b
+          ),
           actionsThisYear: { ...s.actionsThisYear, business: true },
         });
       },
@@ -355,6 +389,7 @@ export const useGameStore = create<GameStore>()(
         const income = totalHourlyIncome(s);
         const yearlyEarnings = income * 600;
         const { stocks, crypto } = driftMarkets(s);
+        const businesses = driftBusinessCompetition(s);
 
         const ageNext = s.age + 1;
         let health = s.health;
@@ -373,6 +408,7 @@ export const useGameStore = create<GameStore>()(
           cash: s.cash + yearlyEarnings,
           stocks,
           crypto,
+          businesses,
           health,
           happiness,
           taxOwed: newTaxOwed,
@@ -446,9 +482,9 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'rich-idle-tycoon-save',
-      version: 5,
+      version: 6,
       migrate: (persistedState, persistedVersion) => {
-        if (persistedVersion < 5) {
+        if (persistedVersion < 6) {
           return freshState(1, 0);
         }
         return persistedState as GameStateData;

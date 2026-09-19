@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { formatMoney } from '../utils/format';
-import { totalHourlyIncome } from '../utils/netWorth';
+import { totalHourlyIncome, businessNetIncome, ADULT_AGE } from '../utils/netWorth';
 import { BUSINESS_CATALOG, nextSlotCost, creationCost } from '../data/businesses';
-import { ADULT_AGE } from '../utils/netWorth';
 
 export function AtividadeScreen() {
   const [showCatalog, setShowCatalog] = useState(false);
@@ -113,6 +112,21 @@ export function AtividadeScreen() {
                 <div className="business-level">
                   📶 {b.level} de {b.maxLevel}
                 </div>
+                {!b.isBank && (
+                  <div className="business-market">
+                    <div className="business-market-bar">
+                      <div
+                        className="business-market-fill"
+                        style={{
+                          width: `${b.marketShare}%`,
+                          background: b.marketShare < 30 ? '#ef4444' : b.marketShare < 60 ? '#f59e0b' : '#22c55e',
+                        }}
+                      />
+                    </div>
+                    <span className="business-market-label">{Math.round(b.marketShare)}% quota de mercado</span>
+                  </div>
+                )}
+                <div className="business-net-income">{formatMoney(businessNetIncome(b), true)}/h líquido</div>
                 {b.suspended && <div className="business-suspended">🔒 Suspenso</div>}
               </div>
               <div className="business-actions">

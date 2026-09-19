@@ -29,6 +29,10 @@ export const SLOT_BASE_COST = 1500;
 export const SLOT_GROWTH = 1.9;
 export const CREATE_SAME_TYPE_GROWTH = 1.35;
 
+export const STARTING_MARKET_SHARE = 55;
+export const MARKET_SHARE_UPGRADE_BOOST = 10;
+export const OPERATING_COST_RATE = 0.3;
+
 export function nextSlotCost(currentSlots: number): number {
   return Math.round(SLOT_BASE_COST * Math.pow(SLOT_GROWTH, currentSlots - STARTING_BUSINESS_SLOTS));
 }
@@ -52,6 +56,7 @@ export function createInitialBusinesses(): Business[] {
       owned: true,
       suspended: false,
       isBank: true,
+      marketShare: 100,
     },
   ];
 }
