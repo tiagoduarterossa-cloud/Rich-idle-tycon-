@@ -87,14 +87,22 @@ interface GameActions {
 
 export type GameStore = GameStateData & GameActions;
 
+const STOCK_ANNUAL_DRIFT = 0.08;
+const CRYPTO_ANNUAL_DRIFT = 0.02;
+
 function driftMarkets(state: GameStateData): Pick<GameStateData, 'stocks' | 'crypto'> {
+  // Cada "Avançar Ano" representa um ano de mercado: as ações têm uma
+  // tendência de subida de longo prazo (como o mercado real, em média),
+  // a cripto é muito mais errática e não tem tendência garantida.
   const stocks = state.stocks.map((s) => {
-    const change = (Math.random() * 2 - 1) * s.volatility;
+    const noise = (Math.random() * 2 - 1) * s.volatility * 6;
+    const change = Math.max(-0.6, Math.min(1.2, STOCK_ANNUAL_DRIFT + noise));
     const price = Math.max(0.5, s.price * (1 + change));
     return { ...s, price: Number(price.toFixed(2)), change: change * 100 };
   });
   const crypto = state.crypto.map((c) => {
-    const change = (Math.random() * 2 - 1) * c.volatility;
+    const noise = (Math.random() * 2 - 1) * c.volatility * 8;
+    const change = Math.max(-0.75, Math.min(2.5, CRYPTO_ANNUAL_DRIFT + noise));
     const price = Math.max(0.01, c.price * (1 + change));
     return { ...c, price: Number(price.toFixed(2)), change: change * 100 };
   });
