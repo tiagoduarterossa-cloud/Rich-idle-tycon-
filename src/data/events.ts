@@ -4,6 +4,91 @@ import { formatMoney } from '../utils/format';
 const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v));
 
 export const LIFE_EVENTS: GameEvent[] = [
+  // ---------- BEBÉ / PRIMEIRA INFÂNCIA ----------
+  {
+    id: 'primeiros-passos',
+    icon: '👣',
+    title: 'Primeiros Passos',
+    text: () => 'Depois de muitas tentativas, dás os teus primeiros passos sozinho. Os teus pais celebram cada segundo.',
+    minAge: 1,
+    maxAge: 1,
+    once: true,
+    weight: 10,
+    choices: [
+      {
+        id: 'explorar',
+        label: 'Explorar tudo à tua volta',
+        apply: (s) => ({
+          state: { happiness: clamp(s.happiness + 6), smarts: clamp(s.smarts + 3) },
+          resultText: 'Passas os dias a explorar cada canto de casa. Curioso desde cedo.',
+        }),
+      },
+      {
+        id: 'colo',
+        label: 'Preferir ficar ao colo',
+        apply: (s) => ({
+          state: { happiness: clamp(s.happiness + 8), health: clamp(s.health + 3) },
+          resultText: 'Preferes o conforto do colo dos teus pais. Uma infância tranquila.',
+        }),
+      },
+    ],
+  },
+  {
+    id: 'primeiras-palavras',
+    icon: '🗣️',
+    title: 'Primeiras Palavras',
+    text: () => 'Começas a dizer as tuas primeiras palavras. Toda a família está em euforia.',
+    minAge: 2,
+    maxAge: 3,
+    once: true,
+    weight: 9,
+    choices: [
+      {
+        id: 'falar-muito',
+        label: 'Falar sem parar',
+        apply: (s) => ({
+          state: { smarts: clamp(s.smarts + 6), happiness: clamp(s.happiness + 4) },
+          resultText: 'Tornas-te uma criança extremamente comunicativa.',
+        }),
+      },
+      {
+        id: 'observar-silencioso',
+        label: 'Observar caladinho',
+        apply: (s) => ({
+          state: { smarts: clamp(s.smarts + 4) },
+          resultText: 'Preferes observar tudo em silêncio antes de agir. Uma mente atenta.',
+        }),
+      },
+    ],
+  },
+  {
+    id: 'infancia-brincadeiras',
+    icon: '🧸',
+    title: 'Tempo de Brincar',
+    text: () => 'És uma criança cheia de energia. Como preferes passar as tardes?',
+    minAge: 3,
+    maxAge: 4,
+    weight: 8,
+    choices: [
+      {
+        id: 'brincar-fora',
+        label: 'Brincar ao ar livre com outras crianças',
+        apply: (s) => ({
+          state: { happiness: clamp(s.happiness + 8), health: clamp(s.health + 4) },
+          resultText: 'Fazes os teus primeiros amigos no parque. A infância feliz que todos merecem.',
+        }),
+      },
+      {
+        id: 'brincar-livros',
+        label: 'Ficar em casa com livros e puzzles',
+        apply: (s) => ({
+          state: { smarts: clamp(s.smarts + 8), happiness: clamp(s.happiness + 2) },
+          resultText: 'Mostras um interesse invulgar por livros e quebra-cabeças desde pequeno.',
+        }),
+      },
+    ],
+  },
+
   // ---------- INFÂNCIA ----------
   {
     id: 'primeiro-dia-escola',

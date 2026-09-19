@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { GameStateData, Screen } from '../types';
-import { createInitialBusinesses } from '../data/businesses';
+import { createInitialBusinesses, BUSINESS_CATALOG, STARTING_BUSINESS_SLOTS, nextSlotCost, creationCost } from '../data/businesses';
 import { INITIAL_STOCKS } from '../data/stocks';
 import { INITIAL_REAL_ESTATE } from '../data/realEstate';
 import { INITIAL_CRYPTO } from '../data/crypto';
@@ -14,7 +14,7 @@ const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v))
 function freshState(generation: number, legacyBonus: number): GameStateData {
   return {
     name: 'Alex Rossa',
-    age: 5,
+    age: 0,
     alive: true,
     yearsPlayed: 0,
     generation,
@@ -28,12 +28,13 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
     children: 0,
     education: 'nenhuma',
 
-    cash: 200 + legacyBonus,
+    cash: legacyBonus,
     clickPower: 5,
     taxOwed: 0,
     taxSuspended: false,
 
     businesses: createInitialBusinesses(),
+    businessSlots: STARTING_BUSINESS_SLOTS,
     stocks: INITIAL_STOCKS.map((s) => ({ ...s })),
     realEstate: INITIAL_REAL_ESTATE.map((r) => ({ ...r })),
     crypto: INITIAL_CRYPTO.map((c) => ({ ...c })),
@@ -56,8 +57,9 @@ interface GameActions {
   upgradeClickPower: () => void;
   setScreen: (s: Screen) => void;
 
-  buyBusiness: (id: string) => void;
+  createBusiness: (templateId: string) => void;
   upgradeBusiness: (id: string) => void;
+  buyBusinessSlot: () => void;
 
   buyStock: (id: string, qty: number) => void;
   sellStock: (id: string, qty: number) => void;
@@ -133,14 +135,37 @@ export const useGameStore = create<GameStore>()(
 
       setScreen: (screen) => set({ screen }),
 
-      buyBusiness: (id) => {
+      createBusiness: (templateId) => {
         const s = get();
-        const biz = s.businesses.find((b) => b.id === id);
-        if (!biz || biz.owned || s.cash < biz.baseCost) return;
-        set({
-          cash: s.cash - biz.baseCost,
-          businesses: s.businesses.map((b) => (b.id === id ? { ...b, owned: true, level: 1 } : b)),
-        });
+        const template = BUSINESS_CATALOG.find((t) => t.id === templateId);
+        if (!template) return;
+        const createdCount = s.businesses.filter((b) => !b.isBank).length;
+        if (createdCount >= s.businessSlots) return;
+        const existingOfType = s.businesses.filter((b) => b.templateId === templateId).length;
+        const cost = creationCost(template, existingOfType);
+        if (s.cash < cost) return;
+        const newBusiness = {
+          id: `${templateId}-${Date.now()}-${Math.round(Math.random() * 9999)}`,
+          templateId: template.id,
+          name: template.name,
+          type: template.type,
+          icon: template.icon,
+          baseCost: cost,
+          baseIncome: template.baseIncome,
+          level: 1,
+          maxLevel: template.maxLevel,
+          owned: true,
+          suspended: false,
+          isBank: false,
+        };
+        set({ cash: s.cash - cost, businesses: [...s.businesses, newBusiness] });
+      },
+
+      buyBusinessSlot: () => {
+        const s = get();
+        const cost = nextSlotCost(s.businessSlots);
+        if (s.cash < cost) return;
+        set({ cash: s.cash - cost, businessSlots: s.businessSlots + 1 });
       },
 
       upgradeBusiness: (id) => {

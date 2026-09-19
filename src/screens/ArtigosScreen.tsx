@@ -3,17 +3,39 @@ import { useGameStore } from '../store/gameStore';
 import { formatMoney } from '../utils/format';
 import { RESIDENCE_TIERS } from '../data/items';
 import { residenceValue } from '../utils/netWorth';
+import { CarArt, BoatArt, PlaneArt, type CarVariant, type BoatVariant, type PlaneVariant } from '../components/vehicleArt';
+import { CoinArt, WatchArt, ArtworkArt, type CoinTier, type WatchTier, type ArtTier } from '../components/collectibleArt';
+import type { CollectibleCategory } from '../types';
 
-type Category = 'carro' | 'aviao' | 'iate';
+type VehicleCategory = 'carro' | 'aviao' | 'iate';
 
-const CATEGORY_META: Record<Category, { label: string; icon: string }> = {
+const VEHICLE_CATEGORY_META: Record<VehicleCategory, { label: string; icon: string }> = {
   carro: { label: 'Garagem', icon: '🚗' },
   aviao: { label: 'Hangar', icon: '✈️' },
   iate: { label: 'Porto', icon: '🛥️' },
 };
 
+function VehicleArt({ category, variant }: { category: VehicleCategory; variant: string }) {
+  if (category === 'carro') return <CarArt variant={variant as CarVariant} />;
+  if (category === 'aviao') return <PlaneArt variant={variant as PlaneVariant} />;
+  return <BoatArt variant={variant as BoatVariant} />;
+}
+
+const COLLECTIBLE_CATEGORY_META: Record<CollectibleCategory, { label: string; icon: string }> = {
+  moedas: { label: 'Moedas', icon: '🪙' },
+  relogios: { label: 'Relógios', icon: '⌚' },
+  arte: { label: 'Arte', icon: '🎨' },
+};
+
+function CollectibleArt({ category, tier }: { category: CollectibleCategory; tier: string }) {
+  if (category === 'moedas') return <CoinArt tier={tier as CoinTier} />;
+  if (category === 'relogios') return <WatchArt tier={tier as WatchTier} />;
+  return <ArtworkArt tier={tier as ArtTier} />;
+}
+
 export function ArtigosScreen() {
-  const [category, setCategory] = useState<Category>('carro');
+  const [vehicleCategory, setVehicleCategory] = useState<VehicleCategory>('carro');
+  const [collectibleCategory, setCollectibleCategory] = useState<CollectibleCategory>('moedas');
   const state = useGameStore((s) => s);
   const buyVehicle = useGameStore((s) => s.buyVehicle);
   const buyCollectible = useGameStore((s) => s.buyCollectible);
@@ -22,8 +44,11 @@ export function ArtigosScreen() {
   const nextTier = RESIDENCE_TIERS.find((t) => t.level > state.residenceLevel);
   const upgradeCost = Math.round(50000 * Math.pow(1.8, state.residenceLevel));
 
-  const vehiclesInCategory = state.vehicles.filter((v) => v.category === category);
+  const vehiclesInCategory = state.vehicles.filter((v) => v.category === vehicleCategory);
   const ownedInCategory = vehiclesInCategory.filter((v) => v.owned).length;
+
+  const collectiblesInCategory = state.collectibles.filter((c) => c.category === collectibleCategory);
+  const ownedCollectiblesInCategory = collectiblesInCategory.filter((c) => c.owned).length;
 
   return (
     <div className="screen">
@@ -32,12 +57,16 @@ export function ArtigosScreen() {
       </div>
 
       <div className="category-tabs">
-        {(Object.keys(CATEGORY_META) as Category[]).map((cat) => {
-          const meta = CATEGORY_META[cat];
+        {(Object.keys(VEHICLE_CATEGORY_META) as VehicleCategory[]).map((cat) => {
+          const meta = VEHICLE_CATEGORY_META[cat];
           const items = state.vehicles.filter((v) => v.category === cat);
           const owned = items.filter((v) => v.owned).length;
           return (
-            <button key={cat} className={cat === category ? 'category-tab category-tab--active' : 'category-tab'} onClick={() => setCategory(cat)}>
+            <button
+              key={cat}
+              className={cat === vehicleCategory ? 'category-tab category-tab--active' : 'category-tab'}
+              onClick={() => setVehicleCategory(cat)}
+            >
               <div className="category-tab-icon">{meta.icon}</div>
               <div className="category-tab-label">{meta.label}</div>
               <div className="category-tab-count">{owned}/{items.length}</div>
@@ -47,27 +76,25 @@ export function ArtigosScreen() {
       </div>
 
       <div className="section-title-row">
-        <h2>{CATEGORY_META[category].label}</h2>
+        <h2>{VEHICLE_CATEGORY_META[vehicleCategory].label}</h2>
         <span className="counter">{ownedInCategory}/{vehiclesInCategory.length}</span>
       </div>
 
-      <div className="business-list">
+      <div className="item-grid">
         {vehiclesInCategory.map((v) => (
-          <div key={v.id} className="business-card">
-            <div className="business-icon">{CATEGORY_META[v.category].icon}</div>
-            <div className="business-info">
-              <div className="business-name">{v.name}</div>
-              <div className="business-type">{formatMoney(v.price)}</div>
+          <div key={v.id} className="item-card">
+            <div className="item-art">
+              <VehicleArt category={v.category} variant={v.variant} />
             </div>
-            <div className="business-actions">
-              {v.owned ? (
-                <span className="owned-tag">Adquirido</span>
-              ) : (
-                <button className="buy-btn" onClick={() => buyVehicle(v.id)} disabled={state.cash < v.price}>
-                  Comprar
-                </button>
-              )}
-            </div>
+            <div className="item-name">{v.name}</div>
+            <div className="item-price">{formatMoney(v.price)}</div>
+            {v.owned ? (
+              <span className="owned-tag">Adquirido</span>
+            ) : (
+              <button className="buy-btn" onClick={() => buyVehicle(v.id)} disabled={state.cash < v.price}>
+                Comprar
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -92,12 +119,38 @@ export function ArtigosScreen() {
         <h2>Coleções</h2>
       </div>
 
-      <div className="collectible-grid">
-        {state.collectibles.map((c) => (
-          <div key={c.id} className="collectible-card">
-            <div className="collectible-icon">{c.icon}</div>
-            <div className="collectible-name">{c.name}</div>
-            <div className="collectible-price">{formatMoney(c.price)}</div>
+      <div className="category-tabs">
+        {(Object.keys(COLLECTIBLE_CATEGORY_META) as CollectibleCategory[]).map((cat) => {
+          const meta = COLLECTIBLE_CATEGORY_META[cat];
+          const items = state.collectibles.filter((c) => c.category === cat);
+          const owned = items.filter((c) => c.owned).length;
+          return (
+            <button
+              key={cat}
+              className={cat === collectibleCategory ? 'category-tab category-tab--active' : 'category-tab'}
+              onClick={() => setCollectibleCategory(cat)}
+            >
+              <div className="category-tab-icon">{meta.icon}</div>
+              <div className="category-tab-label">{meta.label}</div>
+              <div className="category-tab-count">{owned}/{items.length}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="section-title-row">
+        <h2>{COLLECTIBLE_CATEGORY_META[collectibleCategory].label}</h2>
+        <span className="counter">{ownedCollectiblesInCategory}/{collectiblesInCategory.length}</span>
+      </div>
+
+      <div className="item-grid">
+        {collectiblesInCategory.map((c) => (
+          <div key={c.id} className="item-card">
+            <div className="item-art item-art--round">
+              <CollectibleArt category={c.category} tier={c.tier} />
+            </div>
+            <div className="item-name">{c.name}</div>
+            <div className="item-price">{formatMoney(c.price)}</div>
             {c.owned ? (
               <span className="owned-tag">Adquirido</span>
             ) : (

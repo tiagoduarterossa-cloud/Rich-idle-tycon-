@@ -1,7 +1,18 @@
 export type Screen = 'investimento' | 'atividade' | 'ganhos' | 'artigos' | 'perfil';
 
+export interface BusinessTemplate {
+  id: string;
+  name: string;
+  type: string;
+  icon: string;
+  baseCost: number;
+  baseIncome: number;
+  maxLevel: number;
+}
+
 export interface Business {
   id: string;
+  templateId: string;
   name: string;
   type: string;
   icon: string;
@@ -11,6 +22,7 @@ export interface Business {
   maxLevel: number;
   owned: boolean;
   suspended: boolean;
+  isBank: boolean;
 }
 
 export interface Stock {
@@ -47,14 +59,18 @@ export interface Vehicle {
   id: string;
   name: string;
   category: 'carro' | 'aviao' | 'iate';
+  variant: string;
   price: number;
   owned: boolean;
 }
 
+export type CollectibleCategory = 'moedas' | 'relogios' | 'arte';
+
 export interface Collectible {
   id: string;
   name: string;
-  icon: string;
+  category: CollectibleCategory;
+  tier: string;
   price: number;
   owned: boolean;
 }
@@ -93,6 +109,7 @@ export interface GameStateData {
 
   // ativos
   businesses: Business[];
+  businessSlots: number;
   stocks: Stock[];
   realEstate: RealEstateAsset[];
   crypto: CryptoAsset[];
