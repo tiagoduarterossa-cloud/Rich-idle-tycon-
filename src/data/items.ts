@@ -3,6 +3,10 @@ import type { CarVariant, BoatVariant, PlaneVariant } from '../components/vehicl
 import type { CoinTier, WatchStyle, RarityTier, ArtworkKey } from '../components/collectibleArt';
 import type { ResidenceVariant } from '../components/residenceArt';
 import { wikimediaImage } from '../utils/wikimedia';
+import carHuracanImg from '../assets/vehicles/car-huracan.jpg';
+import car488Img from '../assets/vehicles/car-488.jpg';
+import carChironImg from '../assets/vehicles/car-chiron.jpg';
+import car911Img from '../assets/vehicles/car-911.jpg';
 
 interface VehicleDef {
   id: string;
@@ -17,10 +21,10 @@ const CAR_DEFS: VehicleDef[] = [
   { id: 'car-fiat500', name: 'Fiat 500', category: 'carro', variant: 'compact', price: 6000, image: wikimediaImage('Fiat 500.jpg') },
   { id: 'car-corolla', name: 'Toyota Corolla', category: 'carro', variant: 'sedan', price: 24000, image: wikimediaImage('2010 Toyota Corolla.jpg') },
   { id: 'car-x5', name: 'BMW X5', category: 'carro', variant: 'suv', price: 68000, image: wikimediaImage('2024 BMW X5.jpg') },
-  { id: 'car-911', name: 'Porsche 911', category: 'carro', variant: 'sports', price: 180000, image: wikimediaImage('Porsche 911 GT1.jpg') },
-  { id: 'car-488', name: 'Ferrari 488', category: 'carro', variant: 'super', price: 650000, image: wikimediaImage('Ferrari 488 GTB.jpg') },
-  { id: 'car-huracan', name: 'Lamborghini Huracán', category: 'carro', variant: 'super', price: 900000, image: wikimediaImage('Lamborghini Huracan Performante.jpg') },
-  { id: 'car-chiron', name: 'Bugatti Chiron', category: 'carro', variant: 'hyper', price: 3200000, image: wikimediaImage('Bugatti Chiron.jpg') },
+  { id: 'car-911', name: 'Porsche 911', category: 'carro', variant: 'sports', price: 180000, image: car911Img },
+  { id: 'car-488', name: 'Ferrari 488', category: 'carro', variant: 'super', price: 650000, image: car488Img },
+  { id: 'car-huracan', name: 'Lamborghini Huracán', category: 'carro', variant: 'super', price: 900000, image: carHuracanImg },
+  { id: 'car-chiron', name: 'Bugatti Chiron', category: 'carro', variant: 'hyper', price: 3200000, image: carChironImg },
   { id: 'car-jesko', name: 'Koenigsegg Jesko', category: 'carro', variant: 'hyper', price: 4800000, image: wikimediaImage('Koenigsegg Jesko 8.jpg') },
   { id: 'car-boattail', name: 'Rolls-Royce Boat Tail', category: 'carro', variant: 'concept', price: 28000000, image: wikimediaImage('Rolls-Royce Boat Tail front.jpg') },
   { id: 'car-nevera', name: 'Rimac Nevera', category: 'carro', variant: 'alien', price: 45000000, image: wikimediaImage('Rimac Nevera.jpg') },
