@@ -59,7 +59,7 @@ export function EscolaScreen() {
     );
   }
 
-  const availableHobbies = HOBBIES.filter((h) => state.age >= h.minAge);
+  const availableHobbies = HOBBIES.filter((h) => state.age >= h.minAge && (h.maxAge === undefined || state.age <= h.maxAge));
   const availableJobs = SHORT_TERM_JOBS.filter((j) => state.age >= j.minAge)
     .slice()
     .reverse();

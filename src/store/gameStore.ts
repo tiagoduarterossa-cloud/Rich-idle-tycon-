@@ -133,7 +133,7 @@ export const useGameStore = create<GameStore>()(
         const s = get();
         if (!s.alive) return;
         const hobby = HOBBIES.find((h) => h.id === hobbyId);
-        if (!hobby || s.age < hobby.minAge) return;
+        if (!hobby || s.age < hobby.minAge || (hobby.maxAge !== undefined && s.age > hobby.maxAge)) return;
         const cost = hobby.cost ?? 0;
         if (s.cash < cost) return;
         set({
