@@ -121,20 +121,26 @@ export function EscolaScreen() {
       </div>
 
       <div className="activity-grid">
-        {availableJobs.map((j) => (
-          <button
-            key={j.id}
-            className="activity-card activity-card--job"
-            onClick={() => {
-              workJob(j.id);
-              flash(`+${formatMoney(j.pay, true)}`);
-            }}
-          >
-            <span className="activity-icon">{j.icon}</span>
-            <span className="activity-name">{j.name}</span>
-            <span className="activity-effect activity-effect--pay">+{formatMoney(j.pay, true)}</span>
-          </button>
-        ))}
+        {availableJobs.map((j) => {
+          const done = state.jobsWorkedThisYear.includes(j.id);
+          return (
+            <button
+              key={j.id}
+              className="activity-card activity-card--job"
+              disabled={done}
+              onClick={() => {
+                workJob(j.id);
+                flash(`+${formatMoney(j.pay, true)}`);
+              }}
+            >
+              <span className="activity-icon">{j.icon}</span>
+              <span className="activity-name">{j.name}</span>
+              <span className="activity-effect activity-effect--pay">
+                {done ? 'Feito este ano' : `+${formatMoney(j.pay, true)}`}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

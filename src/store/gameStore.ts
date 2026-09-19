@@ -45,6 +45,7 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
     residenceLevel: -1,
 
     actionsThisYear: { hobby: false, job: false, business: false, invest: false },
+    jobsWorkedThisYear: [],
 
     activeEventId: null,
     eventQueue: [],
@@ -138,7 +139,12 @@ export const useGameStore = create<GameStore>()(
         if (!s.alive) return;
         const job = SHORT_TERM_JOBS.find((j) => j.id === jobId);
         if (!job || s.age < job.minAge) return;
-        set({ cash: s.cash + job.pay, actionsThisYear: { ...s.actionsThisYear, job: true } });
+        if (s.jobsWorkedThisYear.includes(jobId)) return;
+        set({
+          cash: s.cash + job.pay,
+          actionsThisYear: { ...s.actionsThisYear, job: true },
+          jobsWorkedThisYear: [...s.jobsWorkedThisYear, jobId],
+        });
       },
 
       practiceHobby: (hobbyId) => {
@@ -374,6 +380,7 @@ export const useGameStore = create<GameStore>()(
           eventQueue: queue,
           activeEventId: queue[0] ?? null,
           actionsThisYear: { hobby: false, job: false, business: false, invest: false },
+          jobsWorkedThisYear: [],
         });
 
         if (queue.length === 0) {
@@ -439,9 +446,9 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'rich-idle-tycoon-save',
-      version: 4,
+      version: 5,
       migrate: (persistedState, persistedVersion) => {
-        if (persistedVersion < 4) {
+        if (persistedVersion < 5) {
           return freshState(1, 0);
         }
         return persistedState as GameStateData;
