@@ -94,20 +94,25 @@ export function EscolaScreen() {
       </div>
 
       <div className="activity-grid">
-        {availableHobbies.map((h) => (
-          <button
-            key={h.id}
-            className="activity-card"
-            onClick={() => {
-              practiceHobby(h.id);
-              flash(effectsText(h.effects));
-            }}
-          >
-            <span className="activity-icon">{h.icon}</span>
-            <span className="activity-name">{h.name}</span>
-            <span className="activity-effect">{effectsText(h.effects)}</span>
-          </button>
-        ))}
+        {availableHobbies.map((h) => {
+          const disabled = !!h.cost && state.cash < h.cost;
+          return (
+            <button
+              key={h.id}
+              className="activity-card"
+              disabled={disabled}
+              onClick={() => {
+                practiceHobby(h.id);
+                flash(effectsText(h.effects));
+              }}
+            >
+              <span className="activity-icon">{h.icon}</span>
+              <span className="activity-name">{h.name}</span>
+              <span className="activity-effect">{effectsText(h.effects)}</span>
+              {!!h.cost && <span className="activity-cost">{formatMoney(h.cost)}</span>}
+            </button>
+          );
+        })}
       </div>
 
       <div className="section-title-row">

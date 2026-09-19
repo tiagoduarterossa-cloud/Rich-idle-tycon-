@@ -134,7 +134,10 @@ export const useGameStore = create<GameStore>()(
         if (!s.alive) return;
         const hobby = HOBBIES.find((h) => h.id === hobbyId);
         if (!hobby || s.age < hobby.minAge) return;
+        const cost = hobby.cost ?? 0;
+        if (s.cash < cost) return;
         set({
+          cash: s.cash - cost,
           health: clamp(s.health + (hobby.effects.health ?? 0)),
           happiness: clamp(s.happiness + (hobby.effects.happiness ?? 0)),
           smarts: clamp(s.smarts + (hobby.effects.smarts ?? 0)),
