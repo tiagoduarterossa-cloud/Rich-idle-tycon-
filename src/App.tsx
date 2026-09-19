@@ -6,7 +6,7 @@ import { DeathScreen } from './components/DeathScreen';
 import { PerfilScreen } from './screens/PerfilScreen';
 import { InvestimentoScreen } from './screens/InvestimentoScreen';
 import { AtividadeScreen } from './screens/AtividadeScreen';
-import { GanhosScreen } from './screens/GanhosScreen';
+import { EscolaScreen } from './screens/EscolaScreen';
 import { ArtigosScreen } from './screens/ArtigosScreen';
 import './App.css';
 
@@ -17,8 +17,8 @@ function CurrentScreen() {
       return <InvestimentoScreen />;
     case 'atividade':
       return <AtividadeScreen />;
-    case 'ganhos':
-      return <GanhosScreen />;
+    case 'escola':
+      return <EscolaScreen />;
     case 'artigos':
       return <ArtigosScreen />;
     case 'perfil':

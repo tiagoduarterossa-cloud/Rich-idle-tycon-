@@ -7,6 +7,8 @@ import { INITIAL_REAL_ESTATE } from '../data/realEstate';
 import { INITIAL_CRYPTO } from '../data/crypto';
 import { INITIAL_VEHICLES, INITIAL_COLLECTIBLES, RESIDENCE_TIERS } from '../data/items';
 import { LIFE_EVENTS, pickRandomEvent } from '../data/events';
+import { HOBBIES } from '../data/hobbies';
+import { SHORT_TERM_JOBS } from '../data/jobs';
 import { netWorth, totalHourlyIncome } from '../utils/netWorth';
 
 const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v));
@@ -29,7 +31,6 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
     education: 'nenhuma',
 
     cash: legacyBonus,
-    clickPower: 5,
     taxOwed: 0,
     taxSuspended: false,
 
@@ -47,14 +48,14 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
     eventLog: [],
     lastResult: null,
     seenOnceEvents: [],
-    screen: 'ganhos',
+    screen: 'escola',
     showDeathScreen: false,
   };
 }
 
 interface GameActions {
-  click: () => void;
-  upgradeClickPower: () => void;
+  workJob: (jobId: string) => void;
+  practiceHobby: (hobbyId: string) => void;
   setScreen: (s: Screen) => void;
 
   createBusiness: (templateId: string) => void;
@@ -120,17 +121,25 @@ export const useGameStore = create<GameStore>()(
     (set, get) => ({
       ...freshState(1, 0),
 
-      click: () => {
+      workJob: (jobId) => {
         const s = get();
         if (!s.alive) return;
-        set({ cash: s.cash + s.clickPower });
+        const job = SHORT_TERM_JOBS.find((j) => j.id === jobId);
+        if (!job || s.age < job.minAge) return;
+        set({ cash: s.cash + job.pay });
       },
 
-      upgradeClickPower: () => {
+      practiceHobby: (hobbyId) => {
         const s = get();
-        const cost = Math.round(s.clickPower * 180);
-        if (s.cash < cost) return;
-        set({ cash: s.cash - cost, clickPower: Math.round(s.clickPower * 1.5 + 1) });
+        if (!s.alive) return;
+        const hobby = HOBBIES.find((h) => h.id === hobbyId);
+        if (!hobby || s.age < hobby.minAge) return;
+        set({
+          health: clamp(s.health + (hobby.effects.health ?? 0)),
+          happiness: clamp(s.happiness + (hobby.effects.happiness ?? 0)),
+          smarts: clamp(s.smarts + (hobby.effects.smarts ?? 0)),
+          reputation: clamp(s.reputation + (hobby.effects.reputation ?? 0)),
+        });
       },
 
       setScreen: (screen) => set({ screen }),
@@ -390,9 +399,9 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'rich-idle-tycoon-save',
-      version: 2,
+      version: 3,
       migrate: (persistedState, persistedVersion) => {
-        if (persistedVersion < 2) {
+        if (persistedVersion < 3) {
           return freshState(1, 0);
         }
         return persistedState as GameStateData;

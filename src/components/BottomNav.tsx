@@ -1,11 +1,11 @@
 import { useGameStore } from '../store/gameStore';
 import type { Screen } from '../types';
-import { InvestIcon, ActivityIcon, EarnIcon, ItemsIcon, ProfileIcon } from './icons';
+import { InvestIcon, ActivityIcon, SchoolIcon, ItemsIcon, ProfileIcon } from './icons';
 
 const TABS: { id: Screen; label: string; Icon: typeof InvestIcon }[] = [
   { id: 'investimento', label: 'Investimento', Icon: InvestIcon },
   { id: 'atividade', label: 'Atividade', Icon: ActivityIcon },
-  { id: 'ganhos', label: 'Ganhos', Icon: EarnIcon },
+  { id: 'escola', label: 'Escola', Icon: SchoolIcon },
   { id: 'artigos', label: 'Artigos', Icon: ItemsIcon },
   { id: 'perfil', label: 'Perfil', Icon: ProfileIcon },
 ];

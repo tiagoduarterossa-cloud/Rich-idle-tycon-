@@ -593,23 +593,16 @@
   font-weight: 700;
 }
 
-/* ---------- Ganhos ---------- */
-.ganhos-screen {
-  padding: 40px 18px 120px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  height: 100%;
-}
-
+/* ---------- Escola ---------- */
 .wallet-card {
   width: 100%;
+  position: relative;
   background: linear-gradient(135deg, #0f172a, #1e3a5f);
   color: white;
   border-radius: 22px;
   padding: 22px;
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.35);
+  margin-bottom: 18px;
 }
 
 .wallet-top {
@@ -633,73 +626,122 @@
   word-break: break-word;
 }
 
-.per-click-chip {
-  background: #eef2f7;
-  border-radius: 30px;
-  padding: 8px 18px;
-  font-weight: 800;
-  font-size: 14px;
-  color: #334155;
-}
-
-.per-click-chip span {
-  font-weight: 400;
-  color: #64748b;
-  margin-left: 4px;
-}
-
-.click-area {
-  flex: 1;
-  width: 100%;
-  min-height: 260px;
-  background: linear-gradient(160deg, #0f766e, #0c4a6e);
-  border-radius: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  position: relative;
-  overflow: hidden;
-  user-select: none;
-}
-
-.click-hand {
-  font-size: 54px;
-  pointer-events: none;
-}
-
-.click-hint {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 14px;
-  text-align: center;
-  padding: 0 30px;
-  pointer-events: none;
-}
-
-.click-pulse {
+.wallet-feedback {
   position: absolute;
-  font-weight: 800;
+  top: 14px;
+  right: 18px;
+  background: rgba(74, 222, 128, 0.18);
   color: #4ade80;
-  font-size: 16px;
-  animation: floatUp 0.7s ease-out forwards;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  animation: floatUp 1s ease-out forwards;
 }
 
 @keyframes floatUp {
   from {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: translateY(0);
   }
   to {
     opacity: 0;
-    transform: translate(-50%, -140%);
+    transform: translateY(-16px);
   }
 }
 
-.upgrade-click-btn {
-  width: 100%;
+.too-young-card {
+  background: #f4f6f9;
+  border-radius: 20px;
+  padding: 30px 24px;
+  text-align: center;
+}
+
+.too-young-icon {
+  font-size: 44px;
+  margin-bottom: 10px;
+}
+
+.too-young-text {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.education-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #7c3aed, #4338ca);
+  color: white;
+  border-radius: 18px;
+  padding: 16px 18px;
+  margin-bottom: 8px;
+}
+
+.education-icon {
+  font-size: 32px;
+}
+
+.education-stage {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.education-age {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.activity-card {
+  background: #f4f6f9;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.activity-card:active {
+  background: #e2e8f0;
+}
+
+.activity-card--job {
+  background: #eff6ff;
+}
+
+.activity-card--job:active {
+  background: #dbeafe;
+}
+
+.activity-icon {
+  font-size: 26px;
+}
+
+.activity-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.activity-effect {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.activity-effect--pay {
+  color: #16a34a;
+  font-weight: 700;
 }
 
 /* ---------- Artigos ---------- */

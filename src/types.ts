@@ -1,4 +1,4 @@
-export type Screen = 'investimento' | 'atividade' | 'ganhos' | 'artigos' | 'perfil';
+export type Screen = 'investimento' | 'atividade' | 'escola' | 'artigos' | 'perfil';
 
 export interface BusinessTemplate {
   id: string;
@@ -105,7 +105,6 @@ export interface GameStateData {
 
   // economia
   cash: number;
-  clickPower: number;
   taxOwed: number;
   taxSuspended: boolean;
 

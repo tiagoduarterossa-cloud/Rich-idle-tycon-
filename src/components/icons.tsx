@@ -22,11 +22,12 @@ export function ActivityIcon({ active }: IconProps) {
   );
 }
 
-export function EarnIcon({ active }: IconProps) {
+export function SchoolIcon({ active }: IconProps) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={stroke(active)} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-1h.3a2 2 0 1 1 0 4h-.6a2 2 0 1 0 0 4h.3a2.5 2.5 0 0 0 2.5-1" />
+      <path d="M2 8.5 12 4l10 4.5-10 4.5L2 8.5Z" />
+      <path d="M6 10.5v4.5c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5" />
+      <path d="M21 8.5v6" />
     </svg>
   );
 }
