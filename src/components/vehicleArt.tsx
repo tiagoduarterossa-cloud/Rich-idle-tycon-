@@ -127,7 +127,7 @@ export function CarArt({ variant }: { variant: CarVariant }) {
     );
   }
 
-  const cfg = CAR_SHAPES[variant as Exclude<CarVariant, 'alien'>];
+  const cfg = CAR_SHAPES[variant as Exclude<CarVariant, 'alien'>] ?? CAR_SHAPES.compact;
   return (
     <svg viewBox="0 0 240 130" width="100%" height="100%">
       <defs>

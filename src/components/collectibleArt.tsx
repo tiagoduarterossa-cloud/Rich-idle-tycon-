@@ -26,7 +26,7 @@ const COIN_COLORS: Record<CoinTier, [string, string]> = {
 };
 
 export function CoinArt({ tier }: { tier: CoinTier }) {
-  const [from, to] = COIN_COLORS[tier];
+  const [from, to] = COIN_COLORS[tier] ?? COIN_COLORS.copper;
   const gradId = `coin-${tier}`;
   const sparkly = tier === 'mythic' || tier === 'diamond';
   return (
@@ -241,7 +241,7 @@ const WINE_PALETTE: Record<RarityTier, { glass: string; label: string; accent: s
 };
 
 export function WineArt({ tier }: { tier: RarityTier }) {
-  const p = WINE_PALETTE[tier];
+  const p = WINE_PALETTE[tier] ?? WINE_PALETTE.basic;
   const fancy = tier === 'exquisite' || tier === 'legendary' || tier === 'mythic';
   return (
     <svg viewBox="0 0 120 140" width="100%" height="100%">
@@ -387,7 +387,7 @@ const ARTWORK_SPECS: Record<ArtworkKey, ArtworkSpec> = {
 };
 
 export function ArtworkArt({ artKey }: { artKey: ArtworkKey }) {
-  const spec = ARTWORK_SPECS[artKey];
+  const spec = ARTWORK_SPECS[artKey] ?? ARTWORK_SPECS.street;
   const gradId = `art-${artKey}`;
   return (
     <svg viewBox="0 0 120 120" width="100%" height="100%">
