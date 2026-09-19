@@ -1,4 +1,5 @@
 import { useGameStore } from './store/gameStore';
+import { useAccountStore } from './store/accountStore';
 import { BottomNav } from './components/BottomNav';
 import { EventModal } from './components/EventModal';
 import { ResultToast } from './components/ResultToast';
@@ -8,6 +9,7 @@ import { InvestimentoScreen } from './screens/InvestimentoScreen';
 import { AtividadeScreen } from './screens/AtividadeScreen';
 import { EscolaScreen } from './screens/EscolaScreen';
 import { ArtigosScreen } from './screens/ArtigosScreen';
+import { AuthScreen } from './screens/AuthScreen';
 import './App.css';
 
 function CurrentScreen() {
@@ -29,17 +31,21 @@ function CurrentScreen() {
 }
 
 function App() {
+  const loggedIn = useAccountStore((s) => s.loggedIn);
+
   return (
     <div className="app-shell">
       <div className="phone-frame">
         <div className="phone-notch" />
-        <div className="phone-content">
-          <CurrentScreen />
-        </div>
-        <BottomNav />
-        <ResultToast />
-        <EventModal />
-        <DeathScreen />
+        <div className="phone-content">{loggedIn ? <CurrentScreen /> : <AuthScreen />}</div>
+        {loggedIn && (
+          <>
+            <BottomNav />
+            <ResultToast />
+            <EventModal />
+            <DeathScreen />
+          </>
+        )}
       </div>
     </div>
   );

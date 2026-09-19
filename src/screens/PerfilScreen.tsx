@@ -1,4 +1,5 @@
 import { useGameStore } from '../store/gameStore';
+import { useAccountStore } from '../store/accountStore';
 import {
   businessValue,
   stocksValue,
@@ -16,6 +17,8 @@ export function PerfilScreen() {
   const state = useGameStore((s) => s);
   const payAllTaxes = useGameStore((s) => s.payAllTaxes);
   const advanceYear = useGameStore((s) => s.advanceYear);
+  const username = useAccountStore((s) => s.username);
+  const logout = useAccountStore((s) => s.logout);
 
   const categories = [
     { key: 'saldo', label: 'Saldo', value: Math.max(0, state.cash), color: '#1f7fb0' },
@@ -114,6 +117,19 @@ export function PerfilScreen() {
             Pagar todos os impostos
           </button>
         </div>
+      </div>
+
+      <div className="account-card">
+        <div className="account-info">
+          <div className="account-icon">👤</div>
+          <div>
+            <div className="account-username">{username}</div>
+            <div className="account-hint">Sessão iniciada neste dispositivo</div>
+          </div>
+        </div>
+        <button className="logout-btn" onClick={logout}>
+          Terminar sessão
+        </button>
       </div>
     </div>
   );

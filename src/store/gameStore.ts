@@ -57,6 +57,7 @@ interface GameActions {
   workJob: (jobId: string) => void;
   practiceHobby: (hobbyId: string) => void;
   setScreen: (s: Screen) => void;
+  setName: (name: string) => void;
 
   createBusiness: (templateId: string) => void;
   upgradeBusiness: (id: string) => void;
@@ -154,6 +155,8 @@ export const useGameStore = create<GameStore>()(
       },
 
       setScreen: (screen) => set({ screen }),
+
+      setName: (name) => set({ name: name.trim() || 'Alex Rossa' }),
 
       createBusiness: (templateId) => {
         const s = get();
