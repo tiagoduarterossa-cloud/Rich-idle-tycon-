@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { formatMoney } from '../utils/format';
 import { totalHourlyIncome } from '../utils/netWorth';
 import { BUSINESS_CATALOG, nextSlotCost, creationCost } from '../data/businesses';
+import { ADULT_AGE } from '../utils/netWorth';
 
 export function AtividadeScreen() {
   const [showCatalog, setShowCatalog] = useState(false);
@@ -16,6 +17,23 @@ export function AtividadeScreen() {
   const createdCount = state.businesses.filter((b) => !b.isBank).length;
   const slotsFull = createdCount >= state.businessSlots;
   const slotCost = nextSlotCost(state.businessSlots);
+
+  if (state.age < ADULT_AGE) {
+    return (
+      <div className="screen">
+        <div className="screen-header">
+          <h1>Atividade</h1>
+        </div>
+        <div className="too-young-card">
+          <div className="too-young-icon">🔒</div>
+          <div className="too-young-text">
+            Gerir negócios é coisa de adultos. Volta quando fizeres 18 anos — até lá, ganha dinheiro na Escola com
+            trabalhos e hobbies, ou investe em ações.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="screen">

@@ -55,7 +55,10 @@ export function netWorth(state: GameStateData): number {
   );
 }
 
+export const ADULT_AGE = 18;
+
 export function totalHourlyIncome(state: GameStateData): number {
   if (state.taxSuspended) return 0;
+  if (state.age < ADULT_AGE) return 0;
   return hourlyBusinessIncome(state) + hourlyRealEstateIncome(state);
 }

@@ -9,7 +9,7 @@ import { INITIAL_VEHICLES, INITIAL_COLLECTIBLES, RESIDENCE_TIERS } from '../data
 import { LIFE_EVENTS, pickRandomEvent } from '../data/events';
 import { HOBBIES } from '../data/hobbies';
 import { SHORT_TERM_JOBS } from '../data/jobs';
-import { netWorth, totalHourlyIncome } from '../utils/netWorth';
+import { netWorth, totalHourlyIncome, ADULT_AGE } from '../utils/netWorth';
 
 const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v));
 
@@ -157,6 +157,7 @@ export const useGameStore = create<GameStore>()(
 
       createBusiness: (templateId) => {
         const s = get();
+        if (s.age < ADULT_AGE) return;
         const template = BUSINESS_CATALOG.find((t) => t.id === templateId);
         if (!template) return;
         const createdCount = s.businesses.filter((b) => !b.isBank).length;
@@ -183,6 +184,7 @@ export const useGameStore = create<GameStore>()(
 
       buyBusinessSlot: () => {
         const s = get();
+        if (s.age < ADULT_AGE) return;
         const cost = nextSlotCost(s.businessSlots);
         if (s.cash < cost) return;
         set({ cash: s.cash - cost, businessSlots: s.businessSlots + 1 });
@@ -190,6 +192,7 @@ export const useGameStore = create<GameStore>()(
 
       upgradeBusiness: (id) => {
         const s = get();
+        if (s.age < ADULT_AGE) return;
         const biz = s.businesses.find((b) => b.id === id);
         if (!biz || !biz.owned || biz.level >= biz.maxLevel) return;
         const cost = Math.round(biz.baseCost * 0.4 * (biz.level + 1));
@@ -224,6 +227,7 @@ export const useGameStore = create<GameStore>()(
 
       buyRealEstate: (id) => {
         const s = get();
+        if (s.age < ADULT_AGE) return;
         const re = s.realEstate.find((r) => r.id === id);
         if (!re || re.owned || s.cash < re.value) return;
         set({
@@ -244,6 +248,7 @@ export const useGameStore = create<GameStore>()(
 
       buyCrypto: (id, amount) => {
         const s = get();
+        if (s.age < ADULT_AGE) return;
         const c = s.crypto.find((cr) => cr.id === id);
         if (!c || amount <= 0) return;
         const cost = c.price * amount;
@@ -304,6 +309,7 @@ export const useGameStore = create<GameStore>()(
 
       mergeCompanies: () => {
         const s = get();
+        if (s.age < ADULT_AGE) return;
         const owned = s.businesses.filter((b) => b.owned);
         if (owned.length < 2) return;
         const cost = Math.round(owned.reduce((sum, b) => sum + b.baseCost * 0.5, 0));

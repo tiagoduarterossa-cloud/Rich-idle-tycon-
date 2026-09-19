@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { formatMoney, formatPercent } from '../utils/format';
-import { stocksValue, realEstateValue, cryptoValue } from '../utils/netWorth';
+import { stocksValue, realEstateValue, cryptoValue, ADULT_AGE } from '../utils/netWorth';
 
 type Tab = 'acoes' | 'imobiliario' | 'cripto';
 
@@ -14,6 +14,8 @@ export function InvestimentoScreen() {
   const sellRealEstate = useGameStore((s) => s.sellRealEstate);
   const buyCrypto = useGameStore((s) => s.buyCrypto);
   const sellCrypto = useGameStore((s) => s.sellCrypto);
+
+  const isAdult = state.age >= ADULT_AGE;
 
   const portfolioValue =
     tab === 'acoes' ? stocksValue(state) : tab === 'imobiliario' ? realEstateValue(state) : cryptoValue(state);
@@ -29,10 +31,10 @@ export function InvestimentoScreen() {
           Ações
         </button>
         <button className={tab === 'imobiliario' ? 'tab tab--active' : 'tab'} onClick={() => setTab('imobiliario')}>
-          Imobiliário
+          Imobiliário {!isAdult && '🔒'}
         </button>
         <button className={tab === 'cripto' ? 'tab tab--active' : 'tab'} onClick={() => setTab('cripto')}>
-          Criptomoeda
+          Criptomoeda {!isAdult && '🔒'}
         </button>
       </div>
 
@@ -73,7 +75,14 @@ export function InvestimentoScreen() {
         </div>
       )}
 
-      {tab === 'imobiliario' && (
+      {tab === 'imobiliario' && !isAdult && (
+        <div className="too-young-card">
+          <div className="too-young-icon">🔒</div>
+          <div className="too-young-text">Comprar imóveis é coisa de adultos. Disponível a partir dos 18 anos.</div>
+        </div>
+      )}
+
+      {tab === 'imobiliario' && isAdult && (
         <div className="asset-list">
           {state.realEstate.map((re) => (
             <div key={re.id} className="asset-row">
@@ -101,7 +110,14 @@ export function InvestimentoScreen() {
         </div>
       )}
 
-      {tab === 'cripto' && (
+      {tab === 'cripto' && !isAdult && (
+        <div className="too-young-card">
+          <div className="too-young-icon">🔒</div>
+          <div className="too-young-text">Negociar criptomoedas é coisa de adultos. Disponível a partir dos 18 anos.</div>
+        </div>
+      )}
+
+      {tab === 'cripto' && isAdult && (
         <div className="asset-list">
           {state.crypto.map((c) => (
             <div key={c.id} className="asset-row">
