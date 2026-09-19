@@ -219,6 +219,41 @@
   opacity: 0.5;
 }
 
+.objectives-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.objective-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.objective-row--done {
+  opacity: 0.6;
+}
+
+.objective-check {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.objective-hint {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
 .taxes-card {
   display: flex;
   gap: 14px;

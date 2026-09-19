@@ -118,6 +118,9 @@ export interface GameStateData {
   collectibles: Collectible[];
   residenceLevel: number;
 
+  // objetivos do ano corrente
+  actionsThisYear: { hobby: boolean; job: boolean; business: boolean; invest: boolean };
+
   // ui / eventos
   activeEventId: string | null;
   eventQueue: string[];

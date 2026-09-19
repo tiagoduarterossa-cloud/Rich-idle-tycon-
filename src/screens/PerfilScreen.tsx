@@ -12,6 +12,7 @@ import {
 } from '../utils/netWorth';
 import { formatMoney } from '../utils/format';
 import { HeartPulseIcon, SmileIcon, BrainIcon, StarIcon } from '../components/icons';
+import { getYearlyObjectives, isObjectiveDone, isObjectiveBlocking, canAffordObjective } from '../data/objectives';
 
 export function PerfilScreen() {
   const state = useGameStore((s) => s);
@@ -33,6 +34,9 @@ export function PerfilScreen() {
 
   const total = netWorth(state);
   const taxDue = state.taxOwed;
+
+  const objectives = getYearlyObjectives(state);
+  const objectivesDone = !objectives.some((o) => isObjectiveBlocking(o, state));
 
   return (
     <div className="screen">
@@ -101,8 +105,32 @@ export function PerfilScreen() {
           {state.children > 0 ? ` · ${state.children} filho(s)` : ''}
           {' · '}Geração {state.generation}
         </div>
-        <button className="advance-year-btn" onClick={advanceYear} disabled={!!state.activeEventId}>
-          Avançar Ano ⟶
+
+        {objectives.length > 0 && (
+          <div className="objectives-list">
+            {objectives.map((o) => {
+              const done = isObjectiveDone(o.kind, state.actionsThisYear);
+              const affordable = canAffordObjective(o.kind, state);
+              const icon = done ? '✅' : affordable ? '⬜' : '💤';
+              return (
+                <div key={o.id} className={done ? 'objective-row objective-row--done' : 'objective-row'}>
+                  <span className="objective-check">{icon}</span>
+                  <div className="objective-text">
+                    <div>{o.text}</div>
+                    {!done && <div className="objective-hint">{affordable ? o.hint : 'Ainda sem dinheiro suficiente — não impede de avançar'}</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <button
+          className="advance-year-btn"
+          onClick={advanceYear}
+          disabled={!!state.activeEventId || !objectivesDone}
+        >
+          {objectivesDone ? 'Avançar Ano ⟶' : 'Completa os objetivos para avançar'}
         </button>
       </div>
 

@@ -10,6 +10,7 @@ import { LIFE_EVENTS, pickRandomEvent } from '../data/events';
 import { HOBBIES } from '../data/hobbies';
 import { SHORT_TERM_JOBS } from '../data/jobs';
 import { netWorth, totalHourlyIncome, ADULT_AGE } from '../utils/netWorth';
+import { getYearlyObjectives, isObjectiveBlocking } from '../data/objectives';
 
 const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v));
 
@@ -42,6 +43,8 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
     vehicles: INITIAL_VEHICLES.map((v) => ({ ...v })),
     collectibles: INITIAL_COLLECTIBLES.map((c) => ({ ...c })),
     residenceLevel: -1,
+
+    actionsThisYear: { hobby: false, job: false, business: false, invest: false },
 
     activeEventId: null,
     eventQueue: [],
@@ -135,7 +138,7 @@ export const useGameStore = create<GameStore>()(
         if (!s.alive) return;
         const job = SHORT_TERM_JOBS.find((j) => j.id === jobId);
         if (!job || s.age < job.minAge) return;
-        set({ cash: s.cash + job.pay });
+        set({ cash: s.cash + job.pay, actionsThisYear: { ...s.actionsThisYear, job: true } });
       },
 
       practiceHobby: (hobbyId) => {
@@ -151,6 +154,7 @@ export const useGameStore = create<GameStore>()(
           happiness: clamp(s.happiness + (hobby.effects.happiness ?? 0)),
           smarts: clamp(s.smarts + (hobby.effects.smarts ?? 0)),
           reputation: clamp(s.reputation + (hobby.effects.reputation ?? 0)),
+          actionsThisYear: { ...s.actionsThisYear, hobby: true },
         });
       },
 
@@ -182,7 +186,11 @@ export const useGameStore = create<GameStore>()(
           suspended: false,
           isBank: false,
         };
-        set({ cash: s.cash - cost, businesses: [...s.businesses, newBusiness] });
+        set({
+          cash: s.cash - cost,
+          businesses: [...s.businesses, newBusiness],
+          actionsThisYear: { ...s.actionsThisYear, business: true },
+        });
       },
 
       buyBusinessSlot: () => {
@@ -190,7 +198,11 @@ export const useGameStore = create<GameStore>()(
         if (s.age < ADULT_AGE) return;
         const cost = nextSlotCost(s.businessSlots);
         if (s.cash < cost) return;
-        set({ cash: s.cash - cost, businessSlots: s.businessSlots + 1 });
+        set({
+          cash: s.cash - cost,
+          businessSlots: s.businessSlots + 1,
+          actionsThisYear: { ...s.actionsThisYear, business: true },
+        });
       },
 
       upgradeBusiness: (id) => {
@@ -203,6 +215,7 @@ export const useGameStore = create<GameStore>()(
         set({
           cash: s.cash - cost,
           businesses: s.businesses.map((b) => (b.id === id ? { ...b, level: b.level + 1 } : b)),
+          actionsThisYear: { ...s.actionsThisYear, business: true },
         });
       },
 
@@ -215,6 +228,7 @@ export const useGameStore = create<GameStore>()(
         set({
           cash: s.cash - cost,
           stocks: s.stocks.map((st) => (st.id === id ? { ...st, shares: st.shares + qty } : st)),
+          actionsThisYear: { ...s.actionsThisYear, invest: true },
         });
       },
 
@@ -236,6 +250,7 @@ export const useGameStore = create<GameStore>()(
         set({
           cash: s.cash - re.value,
           realEstate: s.realEstate.map((r) => (r.id === id ? { ...r, owned: true } : r)),
+          actionsThisYear: { ...s.actionsThisYear, invest: true },
         });
       },
 
@@ -259,6 +274,7 @@ export const useGameStore = create<GameStore>()(
         set({
           cash: s.cash - cost,
           crypto: s.crypto.map((cr) => (cr.id === id ? { ...cr, amount: cr.amount + amount } : cr)),
+          actionsThisYear: { ...s.actionsThisYear, invest: true },
         });
       },
 
@@ -320,12 +336,15 @@ export const useGameStore = create<GameStore>()(
         set({
           cash: s.cash - cost,
           businesses: s.businesses.map((b) => (b.owned && b.level < b.maxLevel ? { ...b, level: b.level + 1 } : b)),
+          actionsThisYear: { ...s.actionsThisYear, business: true },
         });
       },
 
       advanceYear: () => {
         const s = get();
         if (!s.alive || s.activeEventId) return;
+        const objectives = getYearlyObjectives(s);
+        if (objectives.some((o) => isObjectiveBlocking(o, s))) return;
 
         const income = totalHourlyIncome(s);
         const yearlyEarnings = income * 600;
@@ -354,6 +373,7 @@ export const useGameStore = create<GameStore>()(
           taxSuspended,
           eventQueue: queue,
           activeEventId: queue[0] ?? null,
+          actionsThisYear: { hobby: false, job: false, business: false, invest: false },
         });
 
         if (queue.length === 0) {
@@ -419,9 +439,9 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'rich-idle-tycoon-save',
-      version: 3,
+      version: 4,
       migrate: (persistedState, persistedVersion) => {
-        if (persistedVersion < 3) {
+        if (persistedVersion < 4) {
           return freshState(1, 0);
         }
         return persistedState as GameStateData;
