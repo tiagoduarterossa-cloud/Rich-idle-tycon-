@@ -7,6 +7,7 @@ import { CarArt, BoatArt, PlaneArt, type CarVariant, type BoatVariant, type Plan
 import { CoinArt, WatchArt, WineArt, ArtworkArt, type CoinTier, type WatchStyle, type RarityTier, type ArtworkKey } from '../components/collectibleArt';
 import { ResidenceArt } from '../components/residenceArt';
 import { SmartImage } from '../components/SmartImage';
+import { tierForRank } from '../utils/tier';
 import type { CollectibleCategory } from '../types';
 
 type VehicleCategory = 'carro' | 'aviao' | 'iate';
@@ -39,6 +40,7 @@ function CollectibleArt({ category, tier }: { category: CollectibleCategory; tie
 
 export function ArtigosScreen() {
   const [vehicleCategory, setVehicleCategory] = useState<VehicleCategory>('carro');
+  const [vehicleSort, setVehicleSort] = useState<'asc' | 'desc'>('asc');
   const [collectibleCategory, setCollectibleCategory] = useState<CollectibleCategory>('moedas');
   const [showResidencePicker, setShowResidencePicker] = useState(false);
   const state = useGameStore((s) => s);
@@ -46,7 +48,13 @@ export function ArtigosScreen() {
   const buyCollectible = useGameStore((s) => s.buyCollectible);
   const moveResidence = useGameStore((s) => s.moveResidence);
 
-  const vehiclesInCategory = state.vehicles.filter((v) => v.category === vehicleCategory);
+  const vehiclesInCategoryByPrice = state.vehicles
+    .filter((v) => v.category === vehicleCategory)
+    .slice()
+    .sort((a, b) => a.price - b.price);
+  const rankById = new Map(vehiclesInCategoryByPrice.map((v, i) => [v.id, i]));
+  const vehiclesInCategory =
+    vehicleSort === 'asc' ? vehiclesInCategoryByPrice : vehiclesInCategoryByPrice.slice().reverse();
   const ownedInCategory = vehiclesInCategory.filter((v) => v.owned).length;
 
   const collectiblesInCategory = state.collectibles.filter((c) => c.category === collectibleCategory);
@@ -86,23 +94,40 @@ export function ArtigosScreen() {
         <span className="counter">{ownedInCategory}/{vehiclesInCategory.length}</span>
       </div>
 
-      <div className="item-grid">
-        {vehiclesInCategory.map((v) => (
-          <div key={v.id} className="item-card">
-            <div className="item-art">
-              <SmartImage src={v.image} alt={v.name} fallback={<VehicleArt category={v.category} variant={v.variant} />} />
+      <div className="sort-pills">
+        <button className={vehicleSort === 'desc' ? 'sort-pill sort-pill--active' : 'sort-pill'} onClick={() => setVehicleSort('desc')}>
+          Caro primeiro
+        </button>
+        <button className={vehicleSort === 'asc' ? 'sort-pill sort-pill--active' : 'sort-pill'} onClick={() => setVehicleSort('asc')}>
+          Barato primeiro
+        </button>
+      </div>
+
+      <div className="vehicle-stack">
+        {vehiclesInCategory.map((v) => {
+          const badge = tierForRank(rankById.get(v.id) ?? 0, vehiclesInCategoryByPrice.length);
+          return (
+            <div key={v.id} className="vehicle-card">
+              <div className="vehicle-card-art">
+                <SmartImage src={v.image} alt={v.name} fallback={<VehicleArt category={v.category} variant={v.variant} />} />
+              </div>
+              <div className="vehicle-card-name">{v.name}</div>
+              <div className="vehicle-card-badge" style={{ color: badge.color, borderColor: badge.color }}>
+                {badge.grade} <span>|</span> {badge.label}
+              </div>
+              <div className="vehicle-card-footer">
+                <div className="vehicle-card-price">{formatMoney(v.price)}</div>
+                {v.owned ? (
+                  <span className="owned-tag">Adquirido</span>
+                ) : (
+                  <button className="buy-btn" onClick={() => buyVehicle(v.id)} disabled={state.cash < v.price}>
+                    Comprar
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="item-name">{v.name}</div>
-            <div className="item-price">{formatMoney(v.price)}</div>
-            {v.owned ? (
-              <span className="owned-tag">Adquirido</span>
-            ) : (
-              <button className="buy-btn" onClick={() => buyVehicle(v.id)} disabled={state.cash < v.price}>
-                Comprar
-              </button>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="residence-card">
