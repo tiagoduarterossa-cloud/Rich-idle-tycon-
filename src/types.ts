@@ -62,6 +62,7 @@ export interface Vehicle {
   variant: string;
   price: number;
   owned: boolean;
+  image?: string;
 }
 
 export type CollectibleCategory = 'moedas' | 'relogios' | 'vinhos' | 'arte';
@@ -73,6 +74,7 @@ export interface Collectible {
   tier: string;
   price: number;
   owned: boolean;
+  image?: string;
 }
 
 export interface EventLogEntry {

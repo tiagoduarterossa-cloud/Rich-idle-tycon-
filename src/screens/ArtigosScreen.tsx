@@ -6,6 +6,7 @@ import { residenceValue } from '../utils/netWorth';
 import { CarArt, BoatArt, PlaneArt, type CarVariant, type BoatVariant, type PlaneVariant } from '../components/vehicleArt';
 import { CoinArt, WatchArt, WineArt, ArtworkArt, type CoinTier, type WatchStyle, type RarityTier, type ArtworkKey } from '../components/collectibleArt';
 import { ResidenceArt } from '../components/residenceArt';
+import { SmartImage } from '../components/SmartImage';
 import type { CollectibleCategory } from '../types';
 
 type VehicleCategory = 'carro' | 'aviao' | 'iate';
@@ -89,7 +90,7 @@ export function ArtigosScreen() {
         {vehiclesInCategory.map((v) => (
           <div key={v.id} className="item-card">
             <div className="item-art">
-              <VehicleArt category={v.category} variant={v.variant} />
+              <SmartImage src={v.image} alt={v.name} fallback={<VehicleArt category={v.category} variant={v.variant} />} />
             </div>
             <div className="item-name">{v.name}</div>
             <div className="item-price">{formatMoney(v.price)}</div>
@@ -190,7 +191,7 @@ export function ArtigosScreen() {
         {collectiblesInCategory.map((c) => (
           <div key={c.id} className="item-card">
             <div className={c.category === 'moedas' ? 'item-art item-art--round' : 'item-art'}>
-              <CollectibleArt category={c.category} tier={c.tier} />
+              <SmartImage src={c.image} alt={c.name} fallback={<CollectibleArt category={c.category} tier={c.tier} />} />
             </div>
             <div className="item-name">{c.name}</div>
             <div className="item-price">{formatMoney(c.price)}</div>
