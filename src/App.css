@@ -770,6 +770,130 @@
   opacity: 0.85;
 }
 
+.main-hobby-picker {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.main-hobby-picker-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #78350f;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.main-hobby-picker-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.main-hobby-chip {
+  background: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #78350f;
+}
+
+.main-hobby-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #7c3aed, #4338ca);
+  color: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.main-hobby-status-icon {
+  font-size: 28px;
+}
+
+.main-hobby-status-info {
+  flex: 1;
+}
+
+.main-hobby-status-title {
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.main-hobby-progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.main-hobby-progress-fill {
+  height: 100%;
+  background: #facc15;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.main-hobby-status-progress {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.study-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.study-card-icon {
+  font-size: 30px;
+}
+
+.study-card-info {
+  flex: 1;
+  text-align: left;
+}
+
+.study-card-title {
+  font-weight: 800;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.study-card-bar {
+  height: 7px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.study-card-fill {
+  height: 100%;
+  background: #60a5fa;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.study-card-label {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
 .activity-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

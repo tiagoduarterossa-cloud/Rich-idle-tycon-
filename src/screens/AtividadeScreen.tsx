@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { formatMoney } from '../utils/format';
 import { totalHourlyIncome, businessNetIncome, ADULT_AGE } from '../utils/netWorth';
 import { BUSINESS_CATALOG, nextSlotCost, creationCost } from '../data/businesses';
+import { HOBBIES, CAREER_THRESHOLD } from '../data/hobbies';
 
 export function AtividadeScreen() {
   const [showCatalog, setShowCatalog] = useState(false);
@@ -17,8 +18,14 @@ export function AtividadeScreen() {
   const slotsFull = createdCount >= state.businessSlots;
   const slotCost = nextSlotCost(state.businessSlots);
   const minCatalogAge = Math.min(...BUSINESS_CATALOG.map((t) => t.minAge ?? ADULT_AGE));
-  const availableTemplates = BUSINESS_CATALOG.filter((t) => state.age >= (t.minAge ?? ADULT_AGE));
+  const careerUnlocked = state.mainHobbyProgress >= CAREER_THRESHOLD;
+  const availableTemplates = BUSINESS_CATALOG.filter((t) => {
+    if (state.age < (t.minAge ?? ADULT_AGE)) return false;
+    if (t.requiresCareer && !(state.mainHobby === t.requiresCareer && careerUnlocked)) return false;
+    return true;
+  });
   const isAdult = state.age >= ADULT_AGE;
+  const mainHobbyInfo = state.mainHobby ? HOBBIES.find((h) => h.id === state.mainHobby) : null;
 
   if (state.age < minCatalogAge) {
     return (
@@ -68,6 +75,12 @@ export function AtividadeScreen() {
           </div>
           {!isAdult && (
             <div className="catalog-hint">Negócios maiores (cafés, startups, companhias aéreas...) só a partir dos 18 anos.</div>
+          )}
+          {mainHobbyInfo && !careerUnlocked && (
+            <div className="catalog-hint">
+              🎯 Carreira de {mainHobbyInfo.name} desbloqueia aos {state.mainHobbyProgress}/{CAREER_THRESHOLD} anos de
+              dedicação (pratica {mainHobbyInfo.name} na Escola).
+            </div>
           )}
           <div className="business-list">
             {availableTemplates.map((tpl) => {

@@ -13,6 +13,12 @@ export const BANK_TEMPLATE: BusinessTemplate = {
 export const BUSINESS_CATALOG: BusinessTemplate[] = [
   { id: 'loja-roupa-online', name: 'Loja de Roupa em Segunda Mão', type: 'E-commerce', icon: '👕', baseCost: 150, baseIncome: 3, maxLevel: 15, minAge: 12 },
   { id: 'dropshipping', name: 'Loja de Dropshipping', type: 'E-commerce', icon: '📦', baseCost: 300, baseIncome: 6, maxLevel: 20, minAge: 12 },
+  { id: 'carreira-artista', name: 'Carreira de Artista', type: 'Arte', icon: '🖌️', baseCost: 0, baseIncome: 20, maxLevel: 25, minAge: 18, requiresCareer: 'desenho' },
+  { id: 'carreira-futebolista', name: 'Carreira de Futebolista', type: 'Desporto', icon: '⚽', baseCost: 0, baseIncome: 60, maxLevel: 30, minAge: 18, requiresCareer: 'futebol' },
+  { id: 'carreira-ator', name: 'Carreira de Ator', type: 'Espetáculo', icon: '🎭', baseCost: 0, baseIncome: 45, maxLevel: 30, minAge: 18, requiresCareer: 'teatro' },
+  { id: 'carreira-musico', name: 'Carreira de Músico', type: 'Música', icon: '🎤', baseCost: 0, baseIncome: 40, maxLevel: 30, minAge: 18, requiresCareer: 'musica' },
+  { id: 'carreira-enxadrista', name: 'Carreira de Enxadrista', type: 'Desporto Mental', icon: '♟️', baseCost: 0, baseIncome: 25, maxLevel: 25, minAge: 18, requiresCareer: 'xadrez' },
+  { id: 'carreira-gamer', name: 'Carreira de Jogador Profissional', type: 'E-sports', icon: '🎮', baseCost: 0, baseIncome: 30, maxLevel: 25, minAge: 18, requiresCareer: 'videojogos' },
   { id: 'cafe', name: 'Café', type: 'Restauração', icon: '☕', baseCost: 800, baseIncome: 15, maxLevel: 30 },
   { id: 'construtora', name: 'Construtora', type: 'Construção', icon: '🏗️', baseCost: 12000, baseIncome: 280, maxLevel: 40 },
   { id: 'aviacao', name: 'Companhia Aérea', type: 'Companhias aéreas', icon: '✈️', baseCost: 60000, baseIncome: 1400, maxLevel: 40 },

@@ -55,6 +55,10 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
     actionsThisYear: { hobby: false, job: false, business: false, invest: false },
     jobsWorkedThisYear: {},
 
+    mainHobby: null,
+    mainHobbyProgress: 0,
+    mainHobbyPracticedThisYear: false,
+
     activeEventId: null,
     eventQueue: [],
     eventLog: [],
@@ -68,6 +72,8 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
 interface GameActions {
   workJob: (jobId: string) => { net: number; gross: number; factor: number } | null;
   practiceHobby: (hobbyId: string) => void;
+  chooseMainHobby: (hobbyId: string) => void;
+  study: () => void;
   setScreen: (s: Screen) => void;
   setName: (name: string) => void;
 
@@ -178,15 +184,37 @@ export const useGameStore = create<GameStore>()(
         const s = get();
         if (!s.alive) return;
         const hobby = HOBBIES.find((h) => h.id === hobbyId);
-        if (!hobby || s.age < hobby.minAge || (hobby.maxAge !== undefined && s.age > hobby.maxAge)) return;
+        const isMainHobby = hobbyId === s.mainHobby;
+        if (!hobby || s.age < hobby.minAge || (hobby.maxAge !== undefined && s.age > hobby.maxAge && !isMainHobby)) return;
         const cost = hobby.cost ?? 0;
         if (s.cash < cost) return;
+        const gainsCareerProgress = isMainHobby && !s.mainHobbyPracticedThisYear;
         set({
           cash: s.cash - cost,
           health: clamp(s.health + (hobby.effects.health ?? 0)),
           happiness: clamp(s.happiness + (hobby.effects.happiness ?? 0)),
           smarts: clamp(s.smarts + (hobby.effects.smarts ?? 0)),
           reputation: clamp(s.reputation + (hobby.effects.reputation ?? 0)),
+          actionsThisYear: { ...s.actionsThisYear, hobby: true },
+          ...(gainsCareerProgress
+            ? { mainHobbyProgress: s.mainHobbyProgress + 1, mainHobbyPracticedThisYear: true }
+            : {}),
+        });
+      },
+
+      chooseMainHobby: (hobbyId) => {
+        const s = get();
+        if (!s.alive || s.mainHobby !== null) return;
+        const hobby = HOBBIES.find((h) => h.id === hobbyId);
+        if (!hobby || !hobby.careerId || s.age < hobby.minAge) return;
+        set({ mainHobby: hobbyId });
+      },
+
+      study: () => {
+        const s = get();
+        if (!s.alive) return;
+        set({
+          smarts: clamp(s.smarts + 3),
           actionsThisYear: { ...s.actionsThisYear, hobby: true },
         });
       },
@@ -420,6 +448,7 @@ export const useGameStore = create<GameStore>()(
           activeEventId: queue[0] ?? null,
           actionsThisYear: { hobby: false, job: false, business: false, invest: false },
           jobsWorkedThisYear: {},
+          mainHobbyPracticedThisYear: false,
         });
 
         if (queue.length === 0) {
@@ -485,9 +514,9 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'rich-idle-tycoon-save',
-      version: 7,
+      version: 8,
       migrate: (persistedState, persistedVersion) => {
-        if (persistedVersion < 7) {
+        if (persistedVersion < 8) {
           return freshState(1, 0);
         }
         return persistedState as GameStateData;

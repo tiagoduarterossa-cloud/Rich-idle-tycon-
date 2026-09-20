@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { formatMoney } from '../utils/format';
-import { HOBBIES } from '../data/hobbies';
+import { HOBBIES, CAREER_THRESHOLD } from '../data/hobbies';
 import { SHORT_TERM_JOBS } from '../data/jobs';
 
 function educationStage(age: number, education: string): string {
@@ -25,6 +25,8 @@ export function EscolaScreen() {
   const state = useGameStore((s) => s);
   const workJob = useGameStore((s) => s.workJob);
   const practiceHobby = useGameStore((s) => s.practiceHobby);
+  const chooseMainHobby = useGameStore((s) => s.chooseMainHobby);
+  const study = useGameStore((s) => s.study);
   const [feedback, setFeedback] = useState<{ text: string } | null>(null);
 
   useEffect(() => {
@@ -59,10 +61,16 @@ export function EscolaScreen() {
     );
   }
 
-  const availableHobbies = HOBBIES.filter((h) => state.age >= h.minAge && (h.maxAge === undefined || state.age <= h.maxAge));
+  const availableHobbies = HOBBIES.filter(
+    (h) => state.age >= h.minAge && (h.maxAge === undefined || state.age <= h.maxAge || h.id === state.mainHobby)
+  );
   const availableJobs = SHORT_TERM_JOBS.filter((j) => state.age >= j.minAge)
     .slice()
     .reverse();
+
+  const mainHobbyDef = state.mainHobby ? HOBBIES.find((h) => h.id === state.mainHobby) : null;
+  const careerUnlocked = state.mainHobbyProgress >= CAREER_THRESHOLD;
+  const careerEligibleAvailable = availableHobbies.filter((h) => h.careerId);
 
   return (
     <div className="screen">
@@ -89,6 +97,62 @@ export function EscolaScreen() {
       </div>
 
       <div className="section-title-row">
+        <h2>Estudar</h2>
+      </div>
+
+      <button
+        className="study-card"
+        onClick={() => {
+          study();
+          flash('+3 Inteligência');
+        }}
+      >
+        <div className="study-card-icon">📚</div>
+        <div className="study-card-info">
+          <div className="study-card-title">Estudar</div>
+          <div className="study-card-bar">
+            <div className="study-card-fill" style={{ width: `${state.smarts}%` }} />
+          </div>
+          <div className="study-card-label">Inteligência: {Math.round(state.smarts)}/100</div>
+        </div>
+      </button>
+
+      {!state.mainHobby && careerEligibleAvailable.length > 0 && (
+        <div className="main-hobby-picker">
+          <div className="main-hobby-picker-title">
+            🌟 Escolhe um hobby principal (fixo) — se te dedicares o suficiente, pode virar a tua carreira em adulto.
+          </div>
+          <div className="main-hobby-picker-options">
+            {careerEligibleAvailable.map((h) => (
+              <button key={h.id} className="main-hobby-chip" onClick={() => chooseMainHobby(h.id)}>
+                {h.icon} {h.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {mainHobbyDef && (
+        <div className="main-hobby-status">
+          <span className="main-hobby-status-icon">{mainHobbyDef.icon}</span>
+          <div className="main-hobby-status-info">
+            <div className="main-hobby-status-title">⭐ Hobby principal: {mainHobbyDef.name}</div>
+            <div className="main-hobby-progress-bar">
+              <div
+                className="main-hobby-progress-fill"
+                style={{ width: `${Math.min(100, (state.mainHobbyProgress / CAREER_THRESHOLD) * 100)}%` }}
+              />
+            </div>
+            <div className="main-hobby-status-progress">
+              {careerUnlocked
+                ? 'Carreira desbloqueada! Vai à Atividade a partir dos 18 anos.'
+                : `${state.mainHobbyProgress}/${CAREER_THRESHOLD} anos de dedicação`}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="section-title-row">
         <h2>Hobbies</h2>
         <span className="counter">{availableHobbies.length}</span>
       </div>
@@ -107,7 +171,9 @@ export function EscolaScreen() {
               }}
             >
               <span className="activity-icon">{h.icon}</span>
-              <span className="activity-name">{h.name}</span>
+              <span className="activity-name">
+                {h.name} {h.id === state.mainHobby && '⭐'}
+              </span>
               <span className="activity-effect">{effectsText(h.effects)}</span>
               {!!h.cost && <span className="activity-cost">{formatMoney(h.cost)}</span>}
             </button>

@@ -9,6 +9,7 @@ export interface BusinessTemplate {
   baseIncome: number;
   maxLevel: number;
   minAge?: number;
+  requiresCareer?: string;
 }
 
 export interface Business {
@@ -123,6 +124,11 @@ export interface GameStateData {
   // objetivos do ano corrente
   actionsThisYear: { hobby: boolean; job: boolean; business: boolean; invest: boolean };
   jobsWorkedThisYear: Record<string, number>;
+
+  // hobby principal (fixo, escolhido uma vez) que pode abrir uma carreira na vida adulta
+  mainHobby: string | null;
+  mainHobbyProgress: number;
+  mainHobbyPracticedThisYear: boolean;
 
   // ui / eventos
   activeEventId: string | null;
