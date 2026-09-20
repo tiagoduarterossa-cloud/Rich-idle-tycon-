@@ -983,15 +983,6 @@
   margin-top: 6px;
 }
 
-.vehicle-card-type {
-  font-size: 12px;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  margin-top: 1px;
-}
-
 .vehicle-card-badge {
   display: inline-block;
   margin-top: 6px;
@@ -1061,15 +1052,6 @@
   font-weight: 700;
   font-size: 13px;
   line-height: 1.25;
-}
-
-.item-type {
-  font-size: 10px;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-top: -4px;
 }
 
 .item-price {
