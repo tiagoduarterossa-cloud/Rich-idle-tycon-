@@ -18,16 +18,16 @@ interface VehicleDef {
 }
 
 const CAR_DEFS: VehicleDef[] = [
-  { id: 'car-fiat500', name: 'Pulce Cento', category: 'carro', variant: 'compact', price: 16500, image: wikimediaImage('Fiat 500.jpg') },
-  { id: 'car-corolla', name: 'Kaito Sera', category: 'carro', variant: 'sedan', price: 23500, image: wikimediaImage('2010 Toyota Corolla.jpg') },
-  { id: 'car-x5', name: 'Bergmann GX5', category: 'carro', variant: 'suv', price: 68000, image: wikimediaImage('2024 BMW X5.jpg') },
-  { id: 'car-911', name: 'Voss GT9', category: 'carro', variant: 'sports', price: 130000, image: car911Img },
-  { id: 'car-huracan', name: 'Toro Furia', category: 'carro', variant: 'super', price: 255000, image: carHuracanImg },
-  { id: 'car-488', name: 'Rosso Scaglia', category: 'carro', variant: 'super', price: 265000, image: car488Img },
-  { id: 'car-nevera', name: 'Volteo Fulmine', category: 'carro', variant: 'alien', price: 2400000, image: wikimediaImage('Rimac Nevera.jpg') },
-  { id: 'car-chiron', name: 'Chevalier Royale', category: 'carro', variant: 'hyper', price: 3000000, image: carChironImg },
-  { id: 'car-jesko', name: 'Nordkap Skarv', category: 'carro', variant: 'hyper', price: 3400000, image: wikimediaImage('Koenigsegg Jesko 8.jpg') },
-  { id: 'car-boattail', name: 'Sterling Regatta', category: 'carro', variant: 'concept', price: 28000000, image: wikimediaImage('Rolls-Royce Boat Tail front.jpg') },
+  { id: 'car-fiat500', name: 'Fiat 500', category: 'carro', variant: 'compact', price: 16500, image: wikimediaImage('Fiat 500.jpg') },
+  { id: 'car-corolla', name: 'Toyota Corolla', category: 'carro', variant: 'sedan', price: 23500, image: wikimediaImage('2010 Toyota Corolla.jpg') },
+  { id: 'car-x5', name: 'BMW X5', category: 'carro', variant: 'suv', price: 68000, image: wikimediaImage('2024 BMW X5.jpg') },
+  { id: 'car-911', name: 'Porsche 911', category: 'carro', variant: 'sports', price: 130000, image: car911Img },
+  { id: 'car-huracan', name: 'Lamborghini Huracán', category: 'carro', variant: 'super', price: 255000, image: carHuracanImg },
+  { id: 'car-488', name: 'Ferrari 488', category: 'carro', variant: 'super', price: 265000, image: car488Img },
+  { id: 'car-nevera', name: 'Rimac Nevera', category: 'carro', variant: 'alien', price: 2400000, image: wikimediaImage('Rimac Nevera.jpg') },
+  { id: 'car-chiron', name: 'Bugatti Chiron', category: 'carro', variant: 'hyper', price: 3000000, image: carChironImg },
+  { id: 'car-jesko', name: 'Koenigsegg Jesko', category: 'carro', variant: 'hyper', price: 3400000, image: wikimediaImage('Koenigsegg Jesko 8.jpg') },
+  { id: 'car-boattail', name: 'Rolls-Royce Boat Tail', category: 'carro', variant: 'concept', price: 28000000, image: wikimediaImage('Rolls-Royce Boat Tail front.jpg') },
 ];
 
 const BOAT_DEFS: VehicleDef[] = [
@@ -73,7 +73,7 @@ const COIN_DEFS: CoinDef[] = [
   { id: 'coin-silver-2', name: 'Táler de Prata Antigo', tier: 'silver', price: 2200 },
   { id: 'coin-gold-1', name: 'Florim de Ouro Florentino', tier: 'gold', price: 4200 },
   { id: 'coin-gold-2', name: 'Soberano Britânico de Ouro', tier: 'gold', price: 12000, image: wikimediaImage('English Sovereign 1887.jpg') },
-  { id: 'coin-platinum-1', name: 'Áureo do Cabo', tier: 'platinum', price: 28000, image: wikimediaImage('Gold aureus coins.jpg') },
+  { id: 'coin-platinum-1', name: 'Krugerrand Sul-Africano', tier: 'platinum', price: 28000, image: wikimediaImage('Gold aureus coins.jpg') },
   { id: 'coin-diamond-1', name: 'Dólar de Prata "Flowing Hair" (1794)', tier: 'diamond', price: 2000000 },
   { id: 'coin-diamond-2', name: 'Dobrão Brasher (1787)', tier: 'diamond', price: 9500000 },
   { id: 'coin-mythic-1', name: 'Águia Dupla de 1933', tier: 'mythic', price: 19000000, image: wikimediaImage('1933 double eagle.JPG') },
@@ -88,16 +88,16 @@ interface WatchDef {
 }
 
 const WATCH_DEFS: WatchDef[] = [
-  { id: 'watch-casio', name: 'Kaion G-Force', style: 'digital', price: 80, image: wikimediaImage('Casio G-Shock DW-5600E wristwatch.jpg') },
-  { id: 'watch-seiko', name: 'Meridian Cinco', style: 'diver', price: 250, image: wikimediaImage('Blue Seiko 5 Watch.jpg') },
-  { id: 'watch-citizen', name: 'Solara Eco-Drive', style: 'diver', price: 450, image: wikimediaImage("Citizen Diver's 200m Eco Drive - Diving watch.jpg") },
-  { id: 'watch-tissot', name: 'Vantage Classic', style: 'chrono', price: 900, image: wikimediaImage('Tissotwatchtouch.jpg') },
-  { id: 'watch-tagheuer', name: 'Velocé Corsa', style: 'chrono', price: 4500, image: wikimediaImage('TAG Heuer Carrera blue.jpg') },
-  { id: 'watch-omega', name: 'Orion Astro', style: 'chrono', price: 9000, image: wikimediaImage('Omega speedmaster.jpg') },
-  { id: 'watch-cartier', name: 'Reine Blindée', style: 'tank', price: 7500, image: wikimediaImage('Cartier Tank.jpg') },
-  { id: 'watch-rolex', name: 'Neptune Diver', style: 'classic', price: 14000, image: wikimediaImage('Rolex-Submariner.jpg') },
-  { id: 'watch-patek', name: 'Aurum Skeleton', style: 'skeleton', price: 150000, image: wikimediaImage('Patek-Philippe-Nautilus-5711.jpg') },
-  { id: 'watch-rm11', name: 'Titanis TX-11', style: 'tonneau', price: 280000 },
+  { id: 'watch-casio', name: 'Casio G-Shock', style: 'digital', price: 80, image: wikimediaImage('Casio G-Shock DW-5600E wristwatch.jpg') },
+  { id: 'watch-seiko', name: 'Seiko 5', style: 'diver', price: 250, image: wikimediaImage('Blue Seiko 5 Watch.jpg') },
+  { id: 'watch-citizen', name: 'Citizen Eco-Drive', style: 'diver', price: 450, image: wikimediaImage("Citizen Diver's 200m Eco Drive - Diving watch.jpg") },
+  { id: 'watch-tissot', name: 'Tissot', style: 'chrono', price: 900, image: wikimediaImage('Tissotwatchtouch.jpg') },
+  { id: 'watch-tagheuer', name: 'Tag Heuer Carrera', style: 'chrono', price: 4500, image: wikimediaImage('TAG Heuer Carrera blue.jpg') },
+  { id: 'watch-omega', name: 'Omega Speedmaster', style: 'chrono', price: 9000, image: wikimediaImage('Omega speedmaster.jpg') },
+  { id: 'watch-cartier', name: 'Cartier Tank', style: 'tank', price: 7500, image: wikimediaImage('Cartier Tank.jpg') },
+  { id: 'watch-rolex', name: 'Rolex Submariner', style: 'classic', price: 14000, image: wikimediaImage('Rolex-Submariner.jpg') },
+  { id: 'watch-patek', name: 'Patek Philippe Nautilus', style: 'skeleton', price: 150000, image: wikimediaImage('Patek-Philippe-Nautilus-5711.jpg') },
+  { id: 'watch-rm11', name: 'Richard Mille RM 11', style: 'tonneau', price: 280000 },
 ];
 
 interface WineDef {
@@ -112,9 +112,9 @@ const WINE_DEFS: WineDef[] = [
   { id: 'wine-tinto-mesa', name: 'Vinho Tinto de Mesa', tier: 'basic', price: 8, image: wikimediaImage('Red wine.jpg') },
   { id: 'wine-aleatico', name: 'Vinho Aleático', tier: 'basic', price: 25, image: wikimediaImage('Aleatico red wine bottle.jpg') },
   { id: 'wine-bordeaux', name: 'Bordeaux Supérieur', tier: 'fine', price: 350, image: wikimediaImage('Château Recougne Bordeaux Supérieur red wine.jpg') },
-  { id: 'wine-lagrange', name: 'Domaine Lagrave 1990', tier: 'rare', price: 85000, image: wikimediaImage('Château Lagrange 1990 J2.jpg') },
-  { id: 'wine-domperignon', name: 'Grande Réserve Doré', tier: 'exquisite', price: 6500, image: wikimediaImage('DomPerignonChampagne.jpg') },
-  { id: 'wine-margaux', name: 'Château Vallière 1994', tier: 'legendary', price: 320000, image: wikimediaImage('Margaux94_1.jpg') },
+  { id: 'wine-lagrange', name: 'Château Lagrange 1990', tier: 'rare', price: 85000, image: wikimediaImage('Château Lagrange 1990 J2.jpg') },
+  { id: 'wine-domperignon', name: 'Dom Pérignon Vintage', tier: 'exquisite', price: 6500, image: wikimediaImage('DomPerignonChampagne.jpg') },
+  { id: 'wine-margaux', name: 'Château Margaux 1994', tier: 'legendary', price: 320000, image: wikimediaImage('Margaux94_1.jpg') },
 ];
 
 interface ArtDef {

@@ -484,9 +484,9 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'rich-idle-tycoon-save',
-      version: 8,
+      version: 7,
       migrate: (persistedState, persistedVersion) => {
-        if (persistedVersion < 8) {
+        if (persistedVersion < 7) {
           return freshState(1, 0);
         }
         return persistedState as GameStateData;
