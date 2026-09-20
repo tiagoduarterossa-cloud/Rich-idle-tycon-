@@ -894,6 +894,17 @@
   opacity: 0.85;
 }
 
+.study-card-hint {
+  font-size: 10px;
+  opacity: 0.65;
+  margin-top: 4px;
+}
+
+.study-card:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .activity-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

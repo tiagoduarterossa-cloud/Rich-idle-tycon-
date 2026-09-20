@@ -124,6 +124,7 @@ export interface GameStateData {
   // objetivos do ano corrente
   actionsThisYear: { hobby: boolean; job: boolean; business: boolean; invest: boolean };
   jobsWorkedThisYear: Record<string, number>;
+  studiesThisYear: number;
 
   // hobby principal (fixo, escolhido uma vez) que pode abrir uma carreira na vida adulta
   mainHobby: string | null;

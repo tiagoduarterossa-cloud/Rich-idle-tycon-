@@ -102,9 +102,10 @@ export function EscolaScreen() {
 
       <button
         className="study-card"
+        disabled={state.studiesThisYear >= 4}
         onClick={() => {
-          study();
-          flash('+3 Inteligência');
+          const gain = study();
+          if (gain) flash(`+${gain} Inteligência`);
         }}
       >
         <div className="study-card-icon">📚</div>
@@ -114,6 +115,11 @@ export function EscolaScreen() {
             <div className="study-card-fill" style={{ width: `${state.smarts}%` }} />
           </div>
           <div className="study-card-label">Inteligência: {Math.round(state.smarts)}/100</div>
+          <div className="study-card-hint">
+            {state.studiesThisYear >= 4
+              ? 'Já estudaste o máximo este ano — avança de ano para continuares'
+              : 'Diminui um pouco todos os anos se não continuares a estudar'}
+          </div>
         </div>
       </button>
 

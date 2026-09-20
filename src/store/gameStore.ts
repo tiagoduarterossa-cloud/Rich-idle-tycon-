@@ -54,6 +54,7 @@ function freshState(generation: number, legacyBonus: number): GameStateData {
 
     actionsThisYear: { hobby: false, job: false, business: false, invest: false },
     jobsWorkedThisYear: {},
+    studiesThisYear: 0,
 
     mainHobby: null,
     mainHobbyProgress: 0,
@@ -73,7 +74,7 @@ interface GameActions {
   workJob: (jobId: string) => { net: number; gross: number; factor: number } | null;
   practiceHobby: (hobbyId: string) => void;
   chooseMainHobby: (hobbyId: string) => void;
-  study: () => void;
+  study: () => number | null;
   setScreen: (s: Screen) => void;
   setName: (name: string) => void;
 
@@ -213,11 +214,16 @@ export const useGameStore = create<GameStore>()(
 
       study: () => {
         const s = get();
-        if (!s.alive) return;
+        if (!s.alive) return null;
+        const times = s.studiesThisYear;
+        const gain = Math.max(0, 4 - times);
+        if (gain <= 0) return null;
         set({
-          smarts: clamp(s.smarts + 3),
+          smarts: clamp(s.smarts + gain),
           actionsThisYear: { ...s.actionsThisYear, hobby: true },
+          studiesThisYear: times + 1,
         });
+        return gain;
       },
 
       setScreen: (screen) => set({ screen }),
@@ -428,11 +434,12 @@ export const useGameStore = create<GameStore>()(
         if (ageNext > 45) health = clamp(health - (ageNext > 65 ? 2.5 : 1));
         if (ageNext <= 18) health = clamp(health + 1);
         let happiness = clamp(s.happiness - 1 + (s.married ? 1 : 0));
+        const smarts = clamp(s.smarts - 4);
 
         const newTaxOwed = s.taxOwed + Math.round(yearlyEarnings * 0.12);
         const taxSuspended = s.taxSuspended || (yearlyEarnings > 0 && newTaxOwed > yearlyEarnings * 2.5);
 
-        const queue = queueYearEvents({ ...s, age: ageNext, health, happiness });
+        const queue = queueYearEvents({ ...s, age: ageNext, health, happiness, smarts });
 
         set({
           age: ageNext,
@@ -443,12 +450,14 @@ export const useGameStore = create<GameStore>()(
           businesses,
           health,
           happiness,
+          smarts,
           taxOwed: newTaxOwed,
           taxSuspended,
           eventQueue: queue,
           activeEventId: queue[0] ?? null,
           actionsThisYear: { hobby: false, job: false, business: false, invest: false },
           jobsWorkedThisYear: {},
+          studiesThisYear: 0,
           mainHobbyPracticedThisYear: false,
         });
 
@@ -517,9 +526,9 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: 'rich-idle-tycoon-save',
-      version: 8,
+      version: 9,
       migrate: (persistedState, persistedVersion) => {
-        if (persistedVersion < 8) {
+        if (persistedVersion < 9) {
           return freshState(1, 0);
         }
         return persistedState as GameStateData;
