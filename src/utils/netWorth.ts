@@ -1,6 +1,8 @@
 import type { Business, GameStateData } from '../types';
 import { RESIDENCE_TIERS } from '../data/items';
-import { OPERATING_COST_RATE } from '../data/businesses';
+import { OPERATING_COST_RATE, BUSINESS_CATALOG } from '../data/businesses';
+
+export const ADULT_AGE = 18;
 
 export function businessValue(state: GameStateData): number {
   return state.businesses
@@ -18,8 +20,17 @@ export function businessNetIncome(b: Business): number {
   return gross * marketFactor * (1 - OPERATING_COST_RATE);
 }
 
+// Cada negócio só gera rendimento a partir da idade mínima do seu tipo — o
+// banco (não está no catálogo) continua a exigir a idade adulta, mas
+// pequenos negócios online já rendem a partir dos 12 anos.
 export function hourlyBusinessIncome(state: GameStateData): number {
-  return state.businesses.filter((b) => b.owned && !b.suspended).reduce((sum, b) => sum + businessNetIncome(b), 0);
+  return state.businesses
+    .filter((b) => b.owned && !b.suspended)
+    .filter((b) => {
+      const template = BUSINESS_CATALOG.find((t) => t.id === b.templateId);
+      return state.age >= (template?.minAge ?? ADULT_AGE);
+    })
+    .reduce((sum, b) => sum + businessNetIncome(b), 0);
 }
 
 export function stocksValue(state: GameStateData): number {
@@ -64,10 +75,7 @@ export function netWorth(state: GameStateData): number {
   );
 }
 
-export const ADULT_AGE = 18;
-
 export function totalHourlyIncome(state: GameStateData): number {
   if (state.taxSuspended) return 0;
-  if (state.age < ADULT_AGE) return 0;
   return hourlyBusinessIncome(state) + hourlyRealEstateIncome(state);
 }

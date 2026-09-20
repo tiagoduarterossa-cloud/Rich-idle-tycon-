@@ -8,6 +8,7 @@ export interface BusinessTemplate {
   baseCost: number;
   baseIncome: number;
   maxLevel: number;
+  minAge?: number;
 }
 
 export interface Business {

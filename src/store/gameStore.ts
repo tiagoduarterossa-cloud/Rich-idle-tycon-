@@ -197,9 +197,9 @@ export const useGameStore = create<GameStore>()(
 
       createBusiness: (templateId) => {
         const s = get();
-        if (s.age < ADULT_AGE) return;
         const template = BUSINESS_CATALOG.find((t) => t.id === templateId);
         if (!template) return;
+        if (s.age < (template.minAge ?? ADULT_AGE)) return;
         const createdCount = s.businesses.filter((b) => !b.isBank).length;
         if (createdCount >= s.businessSlots) return;
         const existingOfType = s.businesses.filter((b) => b.templateId === templateId).length;
@@ -241,9 +241,10 @@ export const useGameStore = create<GameStore>()(
 
       upgradeBusiness: (id) => {
         const s = get();
-        if (s.age < ADULT_AGE) return;
         const biz = s.businesses.find((b) => b.id === id);
         if (!biz || !biz.owned || biz.level >= biz.maxLevel) return;
+        const template = BUSINESS_CATALOG.find((t) => t.id === biz.templateId);
+        if (s.age < (template?.minAge ?? ADULT_AGE)) return;
         const cost = Math.round(biz.baseCost * 0.4 * (biz.level + 1));
         if (s.cash < cost) return;
         set({

@@ -11,6 +11,8 @@ export const BANK_TEMPLATE: BusinessTemplate = {
 };
 
 export const BUSINESS_CATALOG: BusinessTemplate[] = [
+  { id: 'loja-roupa-online', name: 'Loja de Roupa em Segunda Mão', type: 'E-commerce', icon: '👕', baseCost: 150, baseIncome: 3, maxLevel: 15, minAge: 12 },
+  { id: 'dropshipping', name: 'Loja de Dropshipping', type: 'E-commerce', icon: '📦', baseCost: 300, baseIncome: 6, maxLevel: 20, minAge: 12 },
   { id: 'cafe', name: 'Café', type: 'Restauração', icon: '☕', baseCost: 800, baseIncome: 15, maxLevel: 30 },
   { id: 'construtora', name: 'Construtora', type: 'Construção', icon: '🏗️', baseCost: 12000, baseIncome: 280, maxLevel: 40 },
   { id: 'aviacao', name: 'Companhia Aérea', type: 'Companhias aéreas', icon: '✈️', baseCost: 60000, baseIncome: 1400, maxLevel: 40 },

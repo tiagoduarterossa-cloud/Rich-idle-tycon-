@@ -16,8 +16,11 @@ export function AtividadeScreen() {
   const createdCount = state.businesses.filter((b) => !b.isBank).length;
   const slotsFull = createdCount >= state.businessSlots;
   const slotCost = nextSlotCost(state.businessSlots);
+  const minCatalogAge = Math.min(...BUSINESS_CATALOG.map((t) => t.minAge ?? ADULT_AGE));
+  const availableTemplates = BUSINESS_CATALOG.filter((t) => state.age >= (t.minAge ?? ADULT_AGE));
+  const isAdult = state.age >= ADULT_AGE;
 
-  if (state.age < ADULT_AGE) {
+  if (state.age < minCatalogAge) {
     return (
       <div className="screen">
         <div className="screen-header">
@@ -26,8 +29,8 @@ export function AtividadeScreen() {
         <div className="too-young-card">
           <div className="too-young-icon">🔒</div>
           <div className="too-young-text">
-            Gerir negócios é coisa de adultos. Volta quando fizeres 18 anos — até lá, ganha dinheiro na Escola com
-            trabalhos e hobbies, ou investe em ações.
+            Gerir negócios é coisa de gente crescida. Volta quando fizeres {minCatalogAge} anos — até lá, ganha
+            dinheiro na Escola com trabalhos e hobbies, ou investe em ações.
           </div>
         </div>
       </div>
@@ -38,7 +41,7 @@ export function AtividadeScreen() {
     <div className="screen">
       <div className="screen-header">
         <h1>Atividade</h1>
-        <button className="slots-chip" onClick={buyBusinessSlot} disabled={state.cash < slotCost}>
+        <button className="slots-chip" onClick={buyBusinessSlot} disabled={state.cash < slotCost || !isAdult}>
           🧩 Slots {createdCount}/{state.businessSlots} · +{formatMoney(slotCost)}
         </button>
       </div>
@@ -53,7 +56,7 @@ export function AtividadeScreen() {
         <button className="primary-btn" onClick={() => setShowCatalog((v) => !v)}>
           {showCatalog ? 'Fechar catálogo' : 'Criar um negócio'}
         </button>
-        <button className="secondary-btn" onClick={mergeCompanies} disabled={state.businesses.length < 2}>
+        <button className="secondary-btn" onClick={mergeCompanies} disabled={state.businesses.length < 2 || !isAdult}>
           Fusões de empresas
         </button>
       </div>
@@ -63,8 +66,11 @@ export function AtividadeScreen() {
           <div className="catalog-title">
             {slotsFull ? 'Sem slots livres — compra mais slots para criar mais negócios' : 'Escolhe o tipo de negócio a fundar'}
           </div>
+          {!isAdult && (
+            <div className="catalog-hint">Negócios maiores (cafés, startups, companhias aéreas...) só a partir dos 18 anos.</div>
+          )}
           <div className="business-list">
-            {BUSINESS_CATALOG.map((tpl) => {
+            {availableTemplates.map((tpl) => {
               const existingOfType = state.businesses.filter((b) => b.templateId === tpl.id).length;
               const cost = creationCost(tpl, existingOfType);
               return (
@@ -101,6 +107,8 @@ export function AtividadeScreen() {
       <div className="business-list">
         {state.businesses.map((b) => {
           const upgradeCost = Math.round(b.baseCost * 0.4 * (b.level + 1));
+          const tpl = BUSINESS_CATALOG.find((t) => t.id === b.templateId);
+          const bizMinAge = tpl?.minAge ?? ADULT_AGE;
           return (
             <div key={b.id} className="business-card">
               <div className="business-icon">{b.icon}</div>
@@ -133,7 +141,7 @@ export function AtividadeScreen() {
                 <button
                   className="buy-btn"
                   onClick={() => upgradeBusiness(b.id)}
-                  disabled={b.level >= b.maxLevel || state.cash < upgradeCost}
+                  disabled={b.level >= b.maxLevel || state.cash < upgradeCost || state.age < bizMinAge}
                 >
                   {b.level >= b.maxLevel ? 'Máximo' : `+1 · ${formatMoney(upgradeCost)}`}
                 </button>
