@@ -830,13 +830,22 @@
   display: flex;
   gap: 10px;
   margin-bottom: 18px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.category-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .category-tab {
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 74px;
   background: #f4f6f9;
   border-radius: 14px;
-  padding: 12px;
+  padding: 12px 10px;
   border: none;
   display: flex;
   flex-direction: column;
