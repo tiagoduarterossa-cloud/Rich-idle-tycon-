@@ -26,6 +26,17 @@ const CATEGORY_META: Record<ArtigosCategory, { label: string; icon: string }> = 
   residencia: { label: 'Casa', icon: '🏠' },
 };
 
+const CATEGORY_GRADIENT: Record<ArtigosCategory, string> = {
+  carro: 'linear-gradient(160deg, #334155, #0f172a)',
+  aviao: 'linear-gradient(160deg, #64748b, #1e293b)',
+  iate: 'linear-gradient(160deg, #0e7490, #0c4a6e)',
+  moedas: 'linear-gradient(160deg, #fbbf24, #b45309)',
+  relogios: 'linear-gradient(160deg, #94a3b8, #334155)',
+  vinhos: 'linear-gradient(160deg, #be123c, #4c0519)',
+  arte: 'linear-gradient(160deg, #a855f7, #4338ca)',
+  residencia: 'linear-gradient(160deg, #14b8a6, #1e3a5f)',
+};
+
 function isVehicleCategory(cat: ArtigosCategory): cat is VehicleCategory {
   return cat === 'carro' || cat === 'aviao' || cat === 'iate';
 }
@@ -78,7 +89,7 @@ export function ArtigosScreen() {
         <h1>Artigos</h1>
       </div>
 
-      <div className="category-tabs">
+      <div className="artigos-tile-grid">
         {CATEGORY_ORDER.map((cat) => {
           const meta = CATEGORY_META[cat];
           let count: string | null = null;
@@ -92,12 +103,15 @@ export function ArtigosScreen() {
           return (
             <button
               key={cat}
-              className={cat === category ? 'category-tab category-tab--active' : 'category-tab'}
+              className={cat === category ? 'artigos-tile artigos-tile--active' : 'artigos-tile'}
+              style={{ background: CATEGORY_GRADIENT[cat] }}
               onClick={() => setCategory(cat)}
             >
-              <div className="category-tab-icon">{meta.icon}</div>
-              <div className="category-tab-label">{meta.label}</div>
-              {count && <div className="category-tab-count">{count}</div>}
+              <span className="artigos-tile-icon">{meta.icon}</span>
+              <div className="artigos-tile-scrim">
+                <span className="artigos-tile-label">{meta.label}</span>
+                {count && <span className="artigos-tile-count">{count}</span>}
+              </div>
             </button>
           );
         })}

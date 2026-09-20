@@ -826,49 +826,61 @@
 }
 
 /* ---------- Artigos ---------- */
-.category-tabs {
-  display: flex;
+.artigos-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-bottom: 18px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 2px;
+  margin-bottom: 20px;
 }
 
-.category-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.category-tab {
-  flex: 0 0 auto;
-  min-width: 74px;
-  background: #f4f6f9;
-  border-radius: 14px;
-  padding: 12px 10px;
+.artigos-tile {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
   border: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
+}
+
+.artigos-tile--active {
+  outline: 3px solid #2563eb;
+  outline-offset: -3px;
+}
+
+.artigos-tile-icon {
+  font-size: 38px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.artigos-tile-scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0));
+  padding: 22px 8px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
 }
 
-.category-tab--active {
-  background: #dbeafe;
+.artigos-tile-label {
+  color: white;
+  font-weight: 800;
+  font-size: 12.5px;
+  text-align: center;
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-.category-tab-icon {
-  font-size: 22px;
-}
-
-.category-tab-label {
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.category-tab-count {
-  color: #64748b;
-  font-size: 11px;
+.artigos-tile-count {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 10px;
+  margin-top: 2px;
 }
 
 .residence-card {
