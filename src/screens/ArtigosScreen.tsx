@@ -18,6 +18,33 @@ const VEHICLE_CATEGORY_META: Record<VehicleCategory, { label: string; icon: stri
   iate: { label: 'Porto', icon: '🛥️' },
 };
 
+const VEHICLE_TYPE_LABEL: Record<CarVariant | BoatVariant | PlaneVariant, string> = {
+  compact: 'Citadino',
+  sedan: 'Sedan',
+  suv: 'SUV',
+  sports: 'Desportivo',
+  super: 'Super-carro',
+  hyper: 'Hiper-carro',
+  concept: 'Concept-car',
+  alien: 'Elétrico Extremo',
+  kayak: 'Caiaque',
+  motorboat: 'Barco a Motor',
+  speedboat: 'Lancha',
+  sailboat: 'Veleiro',
+  yacht: 'Iate',
+  superyacht: 'Superiate',
+  megayacht: 'Megaiate',
+  floatingcity: 'Cidade Flutuante',
+  ultralight: 'Ultraleve',
+  touring: 'Avião de Turismo',
+  helicopter: 'Helicóptero',
+  lightjet: 'Jato Ligeiro',
+  longrange: 'Jato de Longo Alcance',
+  airliner: 'Avião Comercial',
+  supersonic: 'Supersónico',
+  spacestation: 'Estação Espacial',
+};
+
 function VehicleArt({ category, variant }: { category: VehicleCategory; variant: string }) {
   if (category === 'carro') return <CarArt variant={variant as CarVariant} />;
   if (category === 'aviao') return <PlaneArt variant={variant as PlaneVariant} />;
@@ -29,6 +56,16 @@ const COLLECTIBLE_CATEGORY_META: Record<CollectibleCategory, { label: string; ic
   relogios: { label: 'Relógios', icon: '⌚' },
   vinhos: { label: 'Vinhos', icon: '🍷' },
   arte: { label: 'Arte', icon: '🎨' },
+};
+
+const WATCH_STYLE_LABEL: Record<WatchStyle, string> = {
+  digital: 'Digital',
+  diver: 'Mergulho',
+  chrono: 'Cronógrafo',
+  tank: 'Clássico Retangular',
+  classic: 'Clássico',
+  skeleton: 'Esqueleto',
+  tonneau: 'Tonneau',
 };
 
 function CollectibleArt({ category, tier }: { category: CollectibleCategory; tier: string }) {
@@ -112,6 +149,7 @@ export function ArtigosScreen() {
                 <SmartImage src={v.image} alt={v.name} fallback={<VehicleArt category={v.category} variant={v.variant} />} />
               </div>
               <div className="vehicle-card-name">{v.name}</div>
+              <div className="vehicle-card-type">{VEHICLE_TYPE_LABEL[v.variant as CarVariant | BoatVariant | PlaneVariant]}</div>
               <div className="vehicle-card-badge" style={{ color: badge.color, borderColor: badge.color }}>
                 {badge.grade} <span>|</span> {badge.label}
               </div>
@@ -219,6 +257,7 @@ export function ArtigosScreen() {
               <SmartImage src={c.image} alt={c.name} fallback={<CollectibleArt category={c.category} tier={c.tier} />} />
             </div>
             <div className="item-name">{c.name}</div>
+            {c.category === 'relogios' && <div className="item-type">{WATCH_STYLE_LABEL[c.tier as WatchStyle]}</div>}
             <div className="item-price">{formatMoney(c.price)}</div>
             {c.owned ? (
               <span className="owned-tag">Adquirido</span>
