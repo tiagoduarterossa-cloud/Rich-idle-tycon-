@@ -1,37 +1,101 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  type User,
+} from 'firebase/auth';
+import { auth } from '../firebase';
 
-interface AccountState {
-  username: string | null;
-  password: string | null;
-  loggedIn: boolean;
-  createAccount: (username: string, password: string) => void;
-  login: (username: string, password: string) => boolean;
-  logout: () => void;
+interface AccountUser {
+  uid: string;
+  email: string;
 }
 
-export const useAccountStore = create<AccountState>()(
-  persist(
-    (set, get) => ({
-      username: null,
-      password: null,
-      loggedIn: false,
+interface AccountState {
+  user: AccountUser | null;
+  authLoading: boolean;
+  authError: string | null;
+  signUp: (email: string, password: string) => Promise<boolean>;
+  logIn: (email: string, password: string) => Promise<boolean>;
+  logOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<boolean>;
+  clearError: () => void;
+}
 
-      createAccount: (username, password) => {
-        set({ username: username.trim(), password, loggedIn: true });
-      },
+function mapAuthError(code: string): string {
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return 'Já existe uma conta com este email.';
+    case 'auth/invalid-email':
+      return 'Email inválido.';
+    case 'auth/weak-password':
+      return 'A password precisa de pelo menos 6 caracteres.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Email ou password incorretos.';
+    case 'auth/too-many-requests':
+      return 'Demasiadas tentativas. Tenta mais tarde.';
+    case 'auth/network-request-failed':
+      return 'Sem ligação à internet.';
+    default:
+      return 'Ocorreu um erro. Tenta novamente.';
+  }
+}
 
-      login: (username, password) => {
-        const s = get();
-        if (s.username === username.trim() && s.password === password) {
-          set({ loggedIn: true });
-          return true;
-        }
+export const useAccountStore = create<AccountState>()((set) => {
+  onAuthStateChanged(auth, (firebaseUser: User | null) => {
+    set({
+      user: firebaseUser ? { uid: firebaseUser.uid, email: firebaseUser.email ?? '' } : null,
+      authLoading: false,
+    });
+  });
+
+  return {
+    user: null,
+    authLoading: true,
+    authError: null,
+
+    signUp: async (email, password) => {
+      set({ authError: null });
+      try {
+        await createUserWithEmailAndPassword(auth, email.trim(), password);
+        return true;
+      } catch (e) {
+        set({ authError: mapAuthError((e as { code?: string }).code ?? '') });
         return false;
-      },
+      }
+    },
 
-      logout: () => set({ loggedIn: false }),
-    }),
-    { name: 'rich-idle-tycoon-account' }
-  )
-);
+    logIn: async (email, password) => {
+      set({ authError: null });
+      try {
+        await signInWithEmailAndPassword(auth, email.trim(), password);
+        return true;
+      } catch (e) {
+        set({ authError: mapAuthError((e as { code?: string }).code ?? '') });
+        return false;
+      }
+    },
+
+    logOut: async () => {
+      await signOut(auth);
+    },
+
+    resetPassword: async (email) => {
+      set({ authError: null });
+      try {
+        await sendPasswordResetEmail(auth, email.trim());
+        return true;
+      } catch (e) {
+        set({ authError: mapAuthError((e as { code?: string }).code ?? '') });
+        return false;
+      }
+    },
+
+    clearError: () => set({ authError: null }),
+  };
+});

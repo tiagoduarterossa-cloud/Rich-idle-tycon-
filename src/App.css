@@ -1512,6 +1512,34 @@
   margin-top: 26px;
 }
 
+.auth-success {
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.auth-switch-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 13px;
+  margin-top: 18px;
+}
+
+.auth-link-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 12px;
+  margin-top: 14px;
+}
+
 .account-card {
   display: flex;
   align-items: center;

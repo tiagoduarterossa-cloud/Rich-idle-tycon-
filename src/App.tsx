@@ -10,6 +10,7 @@ import { AtividadeScreen } from './screens/AtividadeScreen';
 import { EscolaScreen } from './screens/EscolaScreen';
 import { ArtigosScreen } from './screens/ArtigosScreen';
 import { AuthScreen } from './screens/AuthScreen';
+import { CloudSync } from './components/CloudSync';
 import './App.css';
 
 function CurrentScreen() {
@@ -31,19 +32,24 @@ function CurrentScreen() {
 }
 
 function App() {
-  const loggedIn = useAccountStore((s) => s.loggedIn);
+  const user = useAccountStore((s) => s.user);
+  const authLoading = useAccountStore((s) => s.authLoading);
+  const loggedIn = !!user;
 
   return (
     <div className="app-shell">
       <div className="phone-frame">
         <div className="phone-notch" />
-        <div className="phone-content">{loggedIn ? <CurrentScreen /> : <AuthScreen />}</div>
+        <div className="phone-content">
+          {authLoading ? null : loggedIn ? <CurrentScreen /> : <AuthScreen />}
+        </div>
         {loggedIn && (
           <>
             <BottomNav />
             <ResultToast />
             <EventModal />
             <DeathScreen />
+            <CloudSync />
           </>
         )}
       </div>

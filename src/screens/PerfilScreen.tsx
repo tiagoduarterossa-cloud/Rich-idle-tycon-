@@ -18,8 +18,8 @@ export function PerfilScreen() {
   const state = useGameStore((s) => s);
   const payAllTaxes = useGameStore((s) => s.payAllTaxes);
   const advanceYear = useGameStore((s) => s.advanceYear);
-  const username = useAccountStore((s) => s.username);
-  const logout = useAccountStore((s) => s.logout);
+  const user = useAccountStore((s) => s.user);
+  const logOut = useAccountStore((s) => s.logOut);
 
   const categories = [
     { key: 'saldo', label: 'Saldo', value: Math.max(0, state.cash), color: '#1f7fb0' },
@@ -151,11 +151,11 @@ export function PerfilScreen() {
         <div className="account-info">
           <div className="account-icon">👤</div>
           <div>
-            <div className="account-username">{username}</div>
-            <div className="account-hint">Sessão iniciada neste dispositivo</div>
+            <div className="account-username">{user?.email}</div>
+            <div className="account-hint">Progresso guardado na tua conta</div>
           </div>
         </div>
-        <button className="logout-btn" onClick={logout}>
+        <button className="logout-btn" onClick={() => logOut()}>
           Terminar sessão
         </button>
       </div>

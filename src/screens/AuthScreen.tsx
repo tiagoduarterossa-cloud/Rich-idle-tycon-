@@ -2,36 +2,60 @@ import { useState } from 'react';
 import { useAccountStore } from '../store/accountStore';
 import { useGameStore } from '../store/gameStore';
 
-export function AuthScreen() {
-  const hasAccount = useAccountStore((s) => s.username !== null);
-  return hasAccount ? <LoginForm /> : <CreateAccountForm />;
+function nameFromEmail(email: string): string {
+  const local = email.split('@')[0] ?? '';
+  const words = local
+    .replace(/[._-]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1));
+  return words.length > 0 ? words.join(' ') : 'Alex Rossa';
 }
 
-function CreateAccountForm() {
-  const createAccount = useAccountStore((s) => s.createAccount);
+export function AuthScreen() {
+  const [mode, setMode] = useState<'signup' | 'login'>('signup');
+  return mode === 'signup' ? (
+    <CreateAccountForm onSwitch={() => setMode('login')} />
+  ) : (
+    <LoginForm onSwitch={() => setMode('signup')} />
+  );
+}
+
+function CreateAccountForm({ onSwitch }: { onSwitch: () => void }) {
+  const signUp = useAccountStore((s) => s.signUp);
+  const authError = useAccountStore((s) => s.authError);
+  const clearError = useAccountStore((s) => s.clearError);
   const setName = useGameStore((s) => s.setName);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim().length < 3) {
-      setError('O nome de utilizador precisa de pelo menos 3 caracteres.');
+    setLocalError('');
+    clearError();
+    if (!email.includes('@')) {
+      setLocalError('Introduz um email válido.');
       return;
     }
-    if (password.length < 4) {
-      setError('A password precisa de pelo menos 4 caracteres.');
+    if (password.length < 6) {
+      setLocalError('A password precisa de pelo menos 6 caracteres.');
       return;
     }
     if (password !== confirm) {
-      setError('As passwords não coincidem.');
+      setLocalError('As passwords não coincidem.');
       return;
     }
-    setName(username);
-    createAccount(username, password);
+    setLoading(true);
+    const ok = await signUp(email, password);
+    setLoading(false);
+    if (ok) setName(nameFromEmail(email));
   };
+
+  const error = localError || authError;
 
   return (
     <div className="screen auth-screen">
@@ -41,14 +65,14 @@ function CreateAccountForm() {
 
       <form className="auth-form" onSubmit={submit}>
         <label className="auth-label">
-          Nome de utilizador
+          Email
           <input
             className="auth-input"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="ex: alex.rossa"
-            autoComplete="username"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="tu@exemplo.com"
+            autoComplete="email"
           />
         </label>
         <label className="auth-label">
@@ -76,31 +100,46 @@ function CreateAccountForm() {
 
         {error && <div className="auth-error">{error}</div>}
 
-        <button className="primary-btn auth-submit-btn" type="submit">
-          Criar conta e começar a jogar
+        <button className="primary-btn auth-submit-btn" type="submit" disabled={loading}>
+          {loading ? 'A criar conta...' : 'Criar conta e começar a jogar'}
         </button>
       </form>
 
-      <p className="auth-hint">
-        Nota: a conta fica guardada apenas neste dispositivo/browser, não existe servidor por trás.
-      </p>
+      <button className="auth-switch-btn" onClick={onSwitch}>
+        Já tens conta? Iniciar sessão
+      </button>
+
+      <p className="auth-hint">O teu progresso fica guardado na tua conta e acompanha-te em qualquer dispositivo.</p>
     </div>
   );
 }
 
-function LoginForm() {
-  const username = useAccountStore((s) => s.username);
-  const login = useAccountStore((s) => s.login);
-  const [inputUser, setInputUser] = useState(username ?? '');
+function LoginForm({ onSwitch }: { onSwitch: () => void }) {
+  const logIn = useAccountStore((s) => s.logIn);
+  const resetPassword = useAccountStore((s) => s.resetPassword);
+  const authError = useAccountStore((s) => s.authError);
+  const clearError = useAccountStore((s) => s.clearError);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const ok = login(inputUser, password);
-    if (!ok) {
-      setError('Nome de utilizador ou password incorretos.');
+    clearError();
+    setResetSent(false);
+    setLoading(true);
+    await logIn(email, password);
+    setLoading(false);
+  };
+
+  const handleReset = async () => {
+    if (!email.includes('@')) {
+      clearError();
+      return;
     }
+    const ok = await resetPassword(email);
+    setResetSent(ok);
   };
 
   return (
@@ -111,13 +150,14 @@ function LoginForm() {
 
       <form className="auth-form" onSubmit={submit}>
         <label className="auth-label">
-          Nome de utilizador
+          Email
           <input
             className="auth-input"
-            type="text"
-            value={inputUser}
-            onChange={(e) => setInputUser(e.target.value)}
-            autoComplete="username"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="tu@exemplo.com"
+            autoComplete="email"
           />
         </label>
         <label className="auth-label">
@@ -132,12 +172,20 @@ function LoginForm() {
           />
         </label>
 
-        {error && <div className="auth-error">{error}</div>}
+        {authError && <div className="auth-error">{authError}</div>}
+        {resetSent && <div className="auth-success">Email de recuperação enviado, verifica a tua caixa de entrada.</div>}
 
-        <button className="primary-btn auth-submit-btn" type="submit">
-          Iniciar sessão
+        <button className="primary-btn auth-submit-btn" type="submit" disabled={loading}>
+          {loading ? 'A entrar...' : 'Iniciar sessão'}
         </button>
       </form>
+
+      <button className="auth-link-btn" onClick={handleReset}>
+        Esqueci-me da password
+      </button>
+      <button className="auth-switch-btn" onClick={onSwitch}>
+        Ainda não tens conta? Criar conta
+      </button>
     </div>
   );
 }

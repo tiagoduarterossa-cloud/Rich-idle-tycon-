@@ -102,6 +102,7 @@ interface GameActions {
   dismissResult: () => void;
 
   startNewLife: () => void;
+  loadState: (data: Partial<GameStateData>) => void;
 }
 
 export type GameStore = GameStateData & GameActions;
@@ -511,6 +512,8 @@ export const useGameStore = create<GameStore>()(
         const legacyBonus = Math.round(netWorth(s) * 0.02);
         set({ ...freshState(s.generation + 1, legacyBonus), showDeathScreen: false });
       },
+
+      loadState: (data) => set({ ...freshState(1, 0), ...data }),
     }),
     {
       name: 'rich-idle-tycoon-save',
