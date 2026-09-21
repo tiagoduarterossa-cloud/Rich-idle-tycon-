@@ -168,14 +168,17 @@ export const useGameStore = create<GameStore>()(
         if (!job || s.age < job.minAge) return null;
         if (s.cash < job.cost) return null;
         const timesSold = s.jobsWorkedThisYear[jobId] ?? 0;
+        // o quanto rendes depende de teres estudado (Inteligência), não só de sorte
+        const skillFactor = 0.5 + (s.smarts / 100) * 0.65;
+        const luck = 0.6 + Math.random() * 0.9;
         // sem limite fixo: cada vez que voltas a vender o mesmo, inundas o
         // mercado e a concorrência aperta, até deixar de compensar
-        const base = 0.6 + Math.random() * 0.9;
-        const factor = Number(Math.max(-0.4, base - timesSold * 0.45).toFixed(2));
+        const factor = Number(Math.max(-0.4, skillFactor * luck - timesSold * 0.45).toFixed(2));
         const gross = Math.round(job.pay * factor);
         const net = gross - job.cost;
         set({
           cash: s.cash + net,
+          happiness: clamp(s.happiness - 1),
           actionsThisYear: { ...s.actionsThisYear, job: true },
           jobsWorkedThisYear: { ...s.jobsWorkedThisYear, [jobId]: timesSold + 1 },
         });

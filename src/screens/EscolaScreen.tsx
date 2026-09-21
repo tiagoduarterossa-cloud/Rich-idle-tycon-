@@ -67,6 +67,7 @@ export function EscolaScreen() {
   const availableJobs = SHORT_TERM_JOBS.filter((j) => state.age >= j.minAge)
     .slice()
     .reverse();
+  const skillFactor = 0.5 + (state.smarts / 100) * 0.65;
 
   const mainHobbyDef = state.mainHobby ? HOBBIES.find((h) => h.id === state.mainHobby) : null;
   const careerUnlocked = state.mainHobbyProgress >= CAREER_THRESHOLD;
@@ -191,6 +192,7 @@ export function EscolaScreen() {
         <h2>Trabalhos de Curto Prazo</h2>
         <span className="counter">{availableJobs.length}</span>
       </div>
+      <p className="section-hint">Quanto mais Inteligência tiveres, melhor rendes — e trabalhar cansa um pouco.</p>
 
       <div className="activity-grid">
         {availableJobs.map((j) => {
@@ -214,7 +216,7 @@ export function EscolaScreen() {
               <span className="activity-effect activity-effect--pay">
                 {timesSold >= 3
                   ? 'Mercado saturado'
-                  : `até +${formatMoney(Math.round(j.pay * 1.5), true)}`}
+                  : `até +${formatMoney(Math.round(j.pay * skillFactor * 1.5), true)}`}
               </span>
               {j.cost > 0 && <span className="activity-cost">Custo {formatMoney(j.cost)}</span>}
               {timesSold > 0 && <span className="activity-cost">Vendido {timesSold}x este ano</span>}
