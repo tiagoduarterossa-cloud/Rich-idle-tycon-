@@ -14,10 +14,13 @@ export function businessValue(state: GameStateData): number {
 // poupança do jogador), mas os restantes negócios disputam quota de mercado
 // com a concorrência e têm custos operacionais que comem parte da receita.
 export function businessNetIncome(b: Business): number {
-  const gross = b.baseIncome * (1 + b.level * 0.5);
+  // retornos decrescentes por nível — os primeiros níveis valem muito mais
+  // que os últimos, para não ser possível escalar um negócio ao infinito
+  const gross = b.baseIncome * (1 + Math.sqrt(b.level) * 0.6);
   if (b.isBank) return gross;
   const marketFactor = b.marketShare / 100;
-  return gross * marketFactor * (1 - OPERATING_COST_RATE);
+  const net = gross * marketFactor * (1 - OPERATING_COST_RATE);
+  return b.investorCut ? net * (1 - b.investorCut) : net;
 }
 
 // Cada negócio só gera rendimento a partir da idade mínima do seu tipo — o

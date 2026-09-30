@@ -9,6 +9,7 @@ import {
   MARKET_SHARE_UPGRADE_BOOST,
   nextSlotCost,
   creationCost,
+  type FoundingStrategyId,
 } from '../data/businesses';
 import { INITIAL_STOCKS } from '../data/stocks';
 import { INITIAL_REAL_ESTATE } from '../data/realEstate';
@@ -78,7 +79,7 @@ interface GameActions {
   setScreen: (s: Screen) => void;
   setName: (name: string) => void;
 
-  createBusiness: (templateId: string) => void;
+  createBusiness: (templateId: string, strategy: FoundingStrategyId) => { message: string } | null;
   upgradeBusiness: (id: string) => void;
   buyBusinessSlot: () => void;
 
@@ -128,6 +129,33 @@ function driftMarkets(state: GameStateData): Pick<GameStateData, 'stocks' | 'cry
     return { ...c, price: Number(price.toFixed(2)), change: change * 100 };
   });
   return { stocks, crypto };
+}
+
+// imposto progressivo: quem ganha pouco paga uma fatia pequena, quem ganha
+// milhões por ano paga uma fatia bem maior — como nos sistemas fiscais reais,
+// e trava o crescimento descontrolado de fortunas gigantes
+const TAX_BRACKETS: [number, number][] = [
+  [20000, 0.08],
+  [100000, 0.18],
+  [1000000, 0.28],
+  [10000000, 0.38],
+  [Infinity, 0.48],
+];
+
+function progressiveTax(yearlyEarnings: number): number {
+  if (yearlyEarnings <= 0) return 0;
+  let remaining = yearlyEarnings;
+  let prevCap = 0;
+  let tax = 0;
+  for (const [cap, rate] of TAX_BRACKETS) {
+    const taxableInBracket = Math.min(remaining, cap - prevCap);
+    if (taxableInBracket <= 0) break;
+    tax += taxableInBracket * rate;
+    remaining -= taxableInBracket;
+    prevCap = cap;
+    if (remaining <= 0) break;
+  }
+  return Math.round(tax);
 }
 
 function driftBusinessCompetition(state: GameStateData): GameStateData['businesses'] {
@@ -233,36 +261,69 @@ export const useGameStore = create<GameStore>()(
 
       setName: (name) => set({ name: name.trim() || 'Alex Rossa' }),
 
-      createBusiness: (templateId) => {
+      createBusiness: (templateId, strategy) => {
         const s = get();
         const template = BUSINESS_CATALOG.find((t) => t.id === templateId);
-        if (!template) return;
-        if (s.age < (template.minAge ?? ADULT_AGE)) return;
+        if (!template) return null;
+        if (s.age < (template.minAge ?? ADULT_AGE)) return null;
         const createdCount = s.businesses.filter((b) => !b.isBank).length;
-        if (createdCount >= s.businessSlots) return;
+        if (createdCount >= s.businessSlots) return null;
         const existingOfType = s.businesses.filter((b) => b.templateId === templateId).length;
-        const cost = creationCost(template, existingOfType);
-        if (s.cash < cost) return;
+        const baseCost = creationCost(template, existingOfType);
+
+        // cada estratégia de fundação é uma aposta diferente: começar devagar
+        // é mais barato mas mais fraco, o sócio poupa dinheiro mas fica com
+        // parte dos lucros para sempre, e o arranque agressivo pode correr
+        // muito bem ou sair caro — só se sabe depois de decidir
+        let cost = baseCost;
+        let marketShare = clamp(STARTING_MARKET_SHARE + (Math.random() * 20 - 10), 20, 80);
+        let investorCut: number | undefined;
+        let extraLoss = 0;
+        let message = 'Negócio fundado.';
+
+        if (strategy === 'cautelosa') {
+          cost = Math.round(baseCost * 0.85);
+          marketShare = clamp(35 + (Math.random() * 10 - 5), 20, 60);
+          message = 'Arranque cauteloso: mais barato, mas começaste com pouca quota de mercado.';
+        } else if (strategy === 'agressiva') {
+          const wentWell = Math.random() < 0.55;
+          if (wentWell) {
+            marketShare = clamp(75 + Math.random() * 15, 0, 100);
+            message = 'O arranque agressivo resultou — entraste forte no mercado! 🔥';
+          } else {
+            marketShare = clamp(20 + (Math.random() * 15 - 5), 5, 100);
+            extraLoss = Math.round(baseCost * 0.25);
+            message = 'O arranque agressivo correu mal — gastaste mais do que devias a corrigir erros. 📉';
+          }
+        } else if (strategy === 'parceria') {
+          cost = Math.round(baseCost * 0.5);
+          investorCut = 0.25;
+          message = 'Arranjaste um sócio: fundação mais barata, mas ele fica com 25% dos lucros para sempre.';
+        }
+
+        if (s.cash < cost) return null;
         const newBusiness = {
           id: `${templateId}-${Date.now()}-${Math.round(Math.random() * 9999)}`,
           templateId: template.id,
           name: template.name,
           type: template.type,
           icon: template.icon,
-          baseCost: cost,
+          baseCost,
           baseIncome: template.baseIncome,
           level: 1,
           maxLevel: template.maxLevel,
           owned: true,
           suspended: false,
           isBank: false,
-          marketShare: clamp(STARTING_MARKET_SHARE + (Math.random() * 20 - 10), 20, 80),
+          marketShare,
+          ...(investorCut ? { investorCut } : {}),
         };
         set({
-          cash: s.cash - cost,
+          cash: Math.max(0, s.cash - cost - extraLoss),
           businesses: [...s.businesses, newBusiness],
           actionsThisYear: { ...s.actionsThisYear, business: true },
         });
+        return { message };
       },
 
       buyBusinessSlot: () => {
@@ -408,7 +469,7 @@ export const useGameStore = create<GameStore>()(
         if (s.age < ADULT_AGE) return;
         const owned = s.businesses.filter((b) => b.owned);
         if (owned.length < 2) return;
-        const cost = Math.round(owned.reduce((sum, b) => sum + b.baseCost * 0.5, 0));
+        const cost = Math.round(owned.reduce((sum, b) => sum + b.baseCost * 0.85, 0));
         if (s.cash < cost) return;
         set({
           cash: s.cash - cost,
@@ -439,7 +500,7 @@ export const useGameStore = create<GameStore>()(
         let happiness = clamp(s.happiness - 1 + (s.married ? 1 : 0));
         const smarts = clamp(s.smarts - 4);
 
-        const newTaxOwed = s.taxOwed + Math.round(yearlyEarnings * 0.12);
+        const newTaxOwed = s.taxOwed + progressiveTax(yearlyEarnings);
         const taxSuspended = s.taxSuspended || (yearlyEarnings > 0 && newTaxOwed > yearlyEarnings * 2.5);
 
         const queue = queueYearEvents({ ...s, age: ageNext, health, happiness, smarts });

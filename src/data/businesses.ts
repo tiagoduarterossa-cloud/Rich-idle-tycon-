@@ -39,7 +39,35 @@ export const CREATE_SAME_TYPE_GROWTH = 1.35;
 
 export const STARTING_MARKET_SHARE = 55;
 export const MARKET_SHARE_UPGRADE_BOOST = 10;
-export const OPERATING_COST_RATE = 0.3;
+export const OPERATING_COST_RATE = 0.4;
+
+export type FoundingStrategyId = 'cautelosa' | 'agressiva' | 'parceria';
+
+export interface FoundingStrategy {
+  id: FoundingStrategyId;
+  label: string;
+  description: string;
+}
+
+// Fundar um negócio é uma escolha real: cada estratégia tem um trade-off
+// diferente, e a agressiva pode mesmo correr mal.
+export const FOUNDING_STRATEGIES: FoundingStrategy[] = [
+  {
+    id: 'cautelosa',
+    label: 'Começar devagar',
+    description: '15% mais barato, mas arrancas com pouca quota de mercado.',
+  },
+  {
+    id: 'agressiva',
+    label: 'Arranque agressivo',
+    description: 'Investimento total, sem desconto — pode entrar forte ou correr mal.',
+  },
+  {
+    id: 'parceria',
+    label: 'Arranjar um sócio',
+    description: 'Ele paga metade da fundação, mas fica com 25% dos lucros para sempre.',
+  },
+];
 
 export function nextSlotCost(currentSlots: number): number {
   return Math.round(SLOT_BASE_COST * Math.pow(SLOT_GROWTH, currentSlots - STARTING_BUSINESS_SLOTS));

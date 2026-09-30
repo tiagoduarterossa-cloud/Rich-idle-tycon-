@@ -1,17 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { formatMoney } from '../utils/format';
 import { totalHourlyIncome, businessNetIncome, ADULT_AGE } from '../utils/netWorth';
-import { BUSINESS_CATALOG, nextSlotCost, creationCost } from '../data/businesses';
+import { BUSINESS_CATALOG, FOUNDING_STRATEGIES, nextSlotCost, creationCost, type FoundingStrategyId } from '../data/businesses';
 import { HOBBIES, CAREER_THRESHOLD } from '../data/hobbies';
+
+function strategyCost(baseCost: number, strategyId: FoundingStrategyId): number {
+  if (strategyId === 'cautelosa') return Math.round(baseCost * 0.85);
+  if (strategyId === 'parceria') return Math.round(baseCost * 0.5);
+  return baseCost;
+}
 
 export function AtividadeScreen() {
   const [showCatalog, setShowCatalog] = useState(false);
+  const [foundingId, setFoundingId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
   const state = useGameStore((s) => s);
   const createBusiness = useGameStore((s) => s.createBusiness);
   const upgradeBusiness = useGameStore((s) => s.upgradeBusiness);
   const mergeCompanies = useGameStore((s) => s.mergeCompanies);
   const buyBusinessSlot = useGameStore((s) => s.buyBusinessSlot);
+
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = setTimeout(() => setFeedback(null), 3500);
+    return () => clearTimeout(timer);
+  }, [feedback]);
 
   const hourly = totalHourlyIncome(state);
   const createdCount = state.businesses.filter((b) => !b.isBank).length;
@@ -82,29 +96,59 @@ export function AtividadeScreen() {
               dedicação (pratica {mainHobbyInfo.name} na Escola).
             </div>
           )}
+          {feedback && <div className="founding-feedback">{feedback}</div>}
           <div className="business-list">
             {availableTemplates.map((tpl) => {
               const existingOfType = state.businesses.filter((b) => b.templateId === tpl.id).length;
-              const cost = creationCost(tpl, existingOfType);
+              const baseCost = creationCost(tpl, existingOfType);
+              const isFounding = foundingId === tpl.id;
               return (
-                <div key={tpl.id} className="business-card">
-                  <div className="business-icon">{tpl.icon}</div>
-                  <div className="business-info">
-                    <div className="business-name">{tpl.name}</div>
-                    <div className="business-type">
-                      {tpl.type}
-                      {existingOfType > 0 ? ` · já tens ${existingOfType}` : ''}
+                <div key={tpl.id} className="business-card business-card--column">
+                  <div className="business-card-row">
+                    <div className="business-icon">{tpl.icon}</div>
+                    <div className="business-info">
+                      <div className="business-name">{tpl.name}</div>
+                      <div className="business-type">
+                        {tpl.type}
+                        {existingOfType > 0 ? ` · já tens ${existingOfType}` : ''}
+                      </div>
+                    </div>
+                    <div className="business-actions">
+                      <button
+                        className="buy-btn"
+                        onClick={() => setFoundingId(isFounding ? null : tpl.id)}
+                        disabled={slotsFull || state.cash < strategyCost(baseCost, 'parceria')}
+                      >
+                        Fundar
+                      </button>
                     </div>
                   </div>
-                  <div className="business-actions">
-                    <button
-                      className="buy-btn"
-                      onClick={() => createBusiness(tpl.id)}
-                      disabled={slotsFull || state.cash < cost}
-                    >
-                      {formatMoney(cost)}
-                    </button>
-                  </div>
+                  {isFounding && (
+                    <div className="founding-strategies">
+                      <div className="founding-strategies-title">Como vais começar {tpl.name}?</div>
+                      {FOUNDING_STRATEGIES.map((strat) => {
+                        const cost = strategyCost(baseCost, strat.id);
+                        return (
+                          <button
+                            key={strat.id}
+                            className="founding-strategy-btn"
+                            disabled={state.cash < cost}
+                            onClick={() => {
+                              const result = createBusiness(tpl.id, strat.id);
+                              setFoundingId(null);
+                              if (result) setFeedback(result.message);
+                            }}
+                          >
+                            <div className="founding-strategy-head">
+                              <span>{strat.label}</span>
+                              <span>{formatMoney(cost)}</span>
+                            </div>
+                            <div className="founding-strategy-desc">{strat.description}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}

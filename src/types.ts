@@ -26,6 +26,7 @@ export interface Business {
   suspended: boolean;
   isBank: boolean;
   marketShare: number;
+  investorCut?: number;
 }
 
 export interface Stock {
